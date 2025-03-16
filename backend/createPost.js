@@ -102,7 +102,7 @@ async function createPost(userKeypair, metadata, network="mainnet") {
 }
  */
 
-async function createPost(userKeypair, metadata, rpcUrl, ) {
+async function createPost(userKeypair, metadata, rpcUrl, network) {
     const postAccount = Keypair.generate();
     const metadataWithUtc = new PostMetadata(metadata); // Ensure date defaults to UTC if not provided
 
