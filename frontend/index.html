@@ -3,108 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SonicVault512 - Your DeFi Hub</title>
-    <style>
+    <title>Wallet - SonicVault512</title>
+    <script src="js/solana-web3.js"></script>
+    <script src="js/yield_options.js"></script>
+    <link rel="icon" type="image/webp" href="src/logo.webp">
+    <!-- <script src="https://unpkg.com/@solana/web3.js@^1.32.0/lib/index.iife.min.js" defer></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+    <script src="js/axios.js"></script>
+    
+    <!-- <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Arial', sans-serif;
             background-color: #121212;
             color: #ffffff;
-            text-align: center;
-        }
-        header {
-            background-color: #1e1e1e;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        header img {
-            height: 50px;
-        }
-        nav {
-            width: 100%;
-            text-align: center;
-            margin-top: 10px;
-        }
-        nav ul {
-            list-style-type: none;
+            margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        nav ul li {
-            margin: 10px 15px;
-        }
-        nav ul li a {
-            color: #00ffcc;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1em;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        nav ul li a:hover {
-            background-color: #00ffcc;
-            color: #121212;
-        }
-        main {
-            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
         }
-        section {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: #1e1e1e;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
-        }
-        footer {
-            background-color: #1e1e1e;
-            padding: 10px;
+
+        /* Header Styles */
+        header {
             width: 100%;
-            position: relative;
-            margin-top: 20px;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
         }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        /* Container Styles */
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            margin-top: 100px; /* Adjust for header height */
+        }
+
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00cc99;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .token-balance {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+
+        .token-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .token-info {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .token-price {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .popup button {
+            margin: 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        /* Responsive Styles */
         @media (max-width: 768px) {
-            nav ul {
+            header {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+    </style> -->
+
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 12px;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            /* background-color: #bdbcbc; */
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+            
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                /* flex-direction: column; */
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+
+
+
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+        }
+
+        @media (max-width: 480px) {
+            .container{
+                display: flex;
                 flex-direction: column;
             }
         }
-    </style>
-    <script>
-        function navigateTo(page) {
-            window.location.href = page;
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
         }
-    </script>
+        button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #00cc99;
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .token-balance {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        .token-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .token-info {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .token-price {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+        .popup button {
+            margin: 10px;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+    </style>
+
 </head>
 <body>
+    <!-- Header -->
     <header>
-        <img src="src/logo.webp" alt="SonicVault512 Logo">
+        <img src="src/logo.webp" alt="SonicVault512 Logo" class="logo">
         <nav>
-            <ul>
-                <li><a href="#" onclick="navigateTo('wallet.html')">Wallet</a></li>
-                <li><a href="#" onclick="navigateTo('stake.html')">Stake</a></li>
-                <li><a href="#" onclick="navigateTo('yield.html')">Yield</a></li>
-                <li><a href="#" onclick="navigateTo('fun.html')">Fun</a></li>
-            </ul>
+            <a href="javascript:void(0);" onclick="navigateWithParams('wallet.html')" class="active">Wallet</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('yield.html')">Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('user_yield.html')">User Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('dapps.html')">DApps</a>
         </nav>
     </header>
-    <main>
-        <section>
-            <h2>Welcome to SonicVault512</h2>
-            <p>Your DeFi hub on Sonic SVM for staking, yielding, and gaming.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 SonicVault512. All rights reserved.</p>
-    </footer>
+
+
+    <!-- Main Content -->
+    <div class="container">
+        <h2>Wallet</h2>
+        <p id="publicKey">No wallet connected</p>
+        <p id="balance">Balance: -- SOL</p>
+        
+        <button id="createWalletBtn" onclick="createWallet()">Create New Wallet</button>
+        <button onclick="downloadPrivateKey()">Download Key</button>
+        <label for="uploadKey" class="custom-file-upload">Upload Key</label>
+        <input type="file" id="uploadKey" onchange="loadPrivateKeyFile(event)">
+        <button onclick="logoutWallet()">Logout</button>
+
+        <div id="tokenBalances"></div>
+    </div>
+
+    <!-- Popup for zero SOL balance -->
+    <div id="zeroSolPopup" class="popup" style="display: none;">
+        <h3>Your SOL balance is 0</h3>
+        <p>You can top-up your SOL using the bridge or buy SOL directly with your card.</p>
+        <button onclick="window.open('https://bridge.sonic.game/', '_blank')">Use Bridge</button>
+        <button onclick="window.open('https://buy.sonic.game/', '_blank')">Buy SOL</button>
+        <button onclick="closePopup()">Close</button>
+    </div>
+    <div id="overlay" class="overlay" style="display: none;"></div>
+
+    <script>
+        let keypair;
+        const rpcEndpoint = new URLSearchParams(window.location.search).get('network') === 'devnet' 
+            ? 'https://api.testnet.sonic.game/' 
+            : 'https://rpc.mainnet-alpha.sonic.game/';
+        // const tokenList = {
+        //     'SOL': { logo: 'https://cryptologos.cc/logos/solana-sol-logo.png', coingeckoId: 'solana' },
+        //     'USDC': { logo: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png', coingeckoId: 'usd-coin' },
+        //     'SRM': { logo: 'https://cryptologos.cc/logos/serum-srm-logo.png', coingeckoId: 'serum' },
+        // };
+
+        const connection = new solanaWeb3.Connection(rpcEndpoint);
+
+        // Metaplex Token Metadata Program ID
+        const METADATA_PROGRAM_ID = new solanaWeb3.PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
+
+        async function createWallet() {
+            keypair = solanaWeb3.Keypair.generate();
+            localStorage.setItem('solana_private_key', JSON.stringify(Array.from(keypair.secretKey)));
+            displayWalletInfo();
+            alert('New wallet created successfully!');
+            location.reload();
+        }
+
+        async function displayWalletInfo() {
+            document.getElementById('publicKey').textContent = keypair.publicKey.toBase58();
+            await getBalance();
+            await fetchTokenBalances();
+            document.getElementById('createWalletBtn').disabled = true;
+        }
+
+        async function loadStoredWallet() {
+            const privateKey = localStorage.getItem('solana_private_key');
+            if (privateKey) {
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
+                displayWalletInfo();
+            }
+        }
+
+        async function getBalance() {
+            if (!keypair) return;
+            const connection = new solanaWeb3.Connection(rpcEndpoint);
+            const balance = await connection.getBalance(keypair.publicKey);
+            document.getElementById('balance').textContent = `Balance: ${balance / solanaWeb3.LAMPORTS_PER_SOL} SOL`;
+            if (balance === 0) showZeroSolPopup();
+        }
+
+      
+
+        // Define the SPL Token Program ID
+        const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+
+        async function fetchTokenBalances() {
+            const tokenBalancesDiv = document.getElementById('tokenBalances');
+            tokenBalancesDiv.innerHTML = '';
+
+            try {
+                // Fetch all parsed token accounts for the user
+                const accounts = await connection.getParsedTokenAccountsByOwner(keypair.publicKey, {
+                    programId: TOKEN_PROGRAM_ID
+                });
+
+                // Check if the user has any tokens
+                if (accounts.value.length === 0) {
+                    tokenBalancesDiv.innerHTML = '<p>No tokens found in your wallet.</p>';
+                    return;
+                }
+
+                // Display token balances
+                for (const account of accounts.value) {
+                    const info = account.account.data.parsed.info;
+                    const mintAddress = new solanaWeb3.PublicKey(info.mint);
+                    const balance = info.tokenAmount.uiAmount;
+
+                    // Fetch token metadata
+                    const metadata = await getTokenMetadata(mintAddress);
+                    if (metadata) {
+                        tokenBalancesDiv.innerHTML += `
+                            <div class="token-balance">
+                                <img src="${metadata.logoURI || 'https://via.placeholder.com/30'}" alt="${metadata.symbol}" class="token-logo">
+                                <div class="token-info">
+                                    <span>${metadata.symbol}: ${balance}</span>
+                                    <span class="token-price">${metadata.name}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching token accounts:', error);
+                tokenBalancesDiv.innerHTML = '<p>Error fetching token accounts.</p>';
+            }
+        }
+
+        async function getTokenMetadata(mintAddress) {
+            try {
+                // Derive the metadata account address
+                const metadataAddress = await solanaWeb3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from('metadata'),
+                        METADATA_PROGRAM_ID.toBuffer(),
+                        mintAddress.toBuffer(),
+                    ],
+                    METADATA_PROGRAM_ID
+                );
+
+                // Fetch the metadata account
+                const metadataAccount = await connection.getAccountInfo(metadataAddress[0]);
+                if (!metadataAccount) return null;
+
+                // Decode the metadata (Metaplex standard)
+                const metadata = decodeMetadata(metadataAccount.data);
+                return {
+                    name: metadata.data.name,
+                    symbol: metadata.data.symbol,
+                    logoURI: metadata.data.uri, // URI to the token's logo
+                    decimals: metadata.data.decimals,
+                };
+            } catch (error) {
+                console.error('Error fetching token metadata:', error);
+                return null;
+            }
+        }
+
+        function decodeMetadata(buffer) {
+            // Metaplex metadata layout (simplified)
+            const data = buffer.slice(1); // Skip the metadata version byte
+            return {
+                data: {
+                    name: data.slice(0, 32).toString().trim(),
+                    symbol: data.slice(32, 64).toString().trim(),
+                    uri: data.slice(64, 128).toString().trim(),
+                    decimals: data[128],
+                },
+            };
+        }
+
+
+        async function getTokenBalance(symbol) {
+            // Placeholder: Replace with actual token balance fetching logic
+            return Math.random().toFixed(2);
+        }
+
+        async function getTokenPrice(coingeckoId) {
+            try {
+                const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${coingeckoId}&vs_currencies=usd`);
+                return response.data[coingeckoId].usd;
+            } catch (error) {
+                console.error('Error fetching token price:', error);
+                return '--';
+            }
+        }
+
+        function showZeroSolPopup() {
+            document.getElementById('zeroSolPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('zeroSolPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function downloadPrivateKey() {
+            if (!keypair) {
+                alert('No wallet found. Create or load a wallet first.');
+                return;
+            }
+            const privateKey = JSON.stringify(Array.from(keypair.secretKey));
+            const blob = new Blob([privateKey], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'solana_private_key.json';
+            link.click();
+        }
+
+        function loadPrivateKeyFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const privateKeyArray = JSON.parse(e.target.result);
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(privateKeyArray));
+                localStorage.setItem('solana_private_key', JSON.stringify(Array.from(keypair.secretKey)));
+                alert('Wallet loaded successfully!');
+                location.reload();
+            };
+            reader.readAsText(file);
+        }
+
+        function logoutWallet() {
+            localStorage.removeItem('solana_private_key');
+            alert('Wallet removed!');
+            location.reload();
+        }
+
+        function navigateWithParams(page) {
+            // Get the current query parameters from the URL
+            const currentParams = window.location.search;
+
+            // Construct the new URL with the target page and current parameters
+            const newUrl = `${page}${currentParams}`;
+
+            // Navigate to the new URL
+            window.location.href = newUrl;
+        }
+
+        
+        window.onload = loadStoredWallet;
+    </script>
 </body>
 </html>
