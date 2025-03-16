@@ -110,6 +110,10 @@ async function createPost(userKeypair, metadata, rpcUrl, network) {
     if(network === "devnet" || network === "dev"){
         programId = devProgramId;
     }
+
+    console.log("The network at Run: " + network);
+    console.log("The RPC at Run: " + rpcUrl);
+    console.log("The Program id: " + programId);
     // Get the first available RPC endpoint for the specified network
     // const rpcUrl = await getAvailableRpcEndpoint(network);
     const connection = new Connection(rpcUrl, 'confirmed');
