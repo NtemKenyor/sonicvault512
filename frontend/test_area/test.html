@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - SonicVault512</title>
+    <script src="https://unpkg.com/@solana/web3.js@^1.32.0/lib/index.iife.min.js" defer></script>
+    <style>
+        /* (Keep your existing styles here) */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Wallet</h2>
+        <p id="publicKey">No wallet connected</p>
+        <p id="balance">Balance: -- SOL</p>
+        
+        <button id="createWalletBtn" onclick="createWallet()">Create New Wallet</button>
+        <button onclick="downloadPrivateKey()">Download Key</button>
+        <label for="uploadKey" class="custom-file-upload">Upload Key</label>
+        <input type="file" id="uploadKey" onchange="loadPrivateKeyFile(event)">
+        <button onclick="logoutWallet()">Logout</button>
+
+        <div id="tokenBalances"></div>
+    </div>
+
+    <!-- Popup for zero SOL balance -->
+    <div id="zeroSolPopup" class="popup" style="display: none;">
+        <h3>Your SOL balance is 0</h3>
+        <p>You can top-up your SOL using the bridge or buy SOL directly with your card.</p>
+        <button onclick="window.open('https://bridge.sonic.game/', '_blank')">Use Bridge</button>
+        <button onclick="window.open('https://buy.sonic.game/', '_blank')">Buy SOL</button>
+        <button onclick="closePopup()">Close</button>
+    </div>
+    <div id="overlay" class="overlay" style="display: none;"></div>
+
+    <script>
+        let keypair;
+        const RPC_URL = new URLSearchParams(window.location.search).get('network') === 'devnet' 
+            ? 'https://api.testnet.sonic.game/' 
+            : 'https://rpc.mainnet-alpha.sonic.game/';
+        const connection = new solanaWeb3.Connection(RPC_URL, "confirmed");
+
+        // SPL Token Program ID
+        const TOKEN_PROGRAM_ID = new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA");
+
+        async function createWallet() {
+            keypair = solanaWeb3.Keypair.generate();
+            localStorage.setItem('solana_private_key', JSON.stringify(Array.from(keypair.secretKey)));
+            displayWalletInfo();
+            alert('New wallet created successfully!');
+            location.reload();
+        }
+
+        async function displayWalletInfo() {
+            document.getElementById('publicKey').textContent = keypair.publicKey.toBase58();
+            await getBalance();
+            await fetchTokenBalances();
+            document.getElementById('createWalletBtn').disabled = true;
+        }
+
+        async function loadStoredWallet() {
+            const privateKey = localStorage.getItem('solana_private_key');
+            if (privateKey) {
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
+                displayWalletInfo();
+            }
+        }
+
+        async function getBalance() {
+            if (!keypair) return;
+            const balance = await connection.getBalance(keypair.publicKey);
+            document.getElementById('balance').textContent = `Balance: ${balance / solanaWeb3.LAMPORTS_PER_SOL} SOL`;
+            if (balance === 0) showZeroSolPopup();
+        }
+
+        async function fetchTokenBalances() {
+            const tokenBalancesDiv = document.getElementById('tokenBalances');
+            tokenBalancesDiv.innerHTML = '';
+
+            try {
+                // Fetch all parsed token accounts for the user
+                const accounts = await connection.getParsedTokenAccountsByOwner(keypair.publicKey, {
+                    programId: TOKEN_PROGRAM_ID
+                });
+
+                // Display token balances
+                for (const account of accounts.value) {
+                    const info = account.account.data.parsed.info;
+                    const mintAddress = new solanaWeb3.PublicKey(info.mint);
+                    const balance = info.tokenAmount.uiAmount;
+
+                    // Fetch token metadata
+                    const metadata = await getTokenMetadata(mintAddress);
+                    if (metadata) {
+                        tokenBalancesDiv.innerHTML += `
+                            <div class="token-balance">
+                                <img src="${metadata.logoURI || 'https://via.placeholder.com/30'}" alt="${metadata.symbol}" class="token-logo">
+                                <div class="token-info">
+                                    <span>${metadata.symbol}: ${balance}</span>
+                                    <span class="token-price">${metadata.name}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching token accounts:', error);
+                tokenBalancesDiv.innerHTML = '<p>Error fetching token accounts.</p>';
+            }
+        }
+
+        async function getTokenMetadata(mintAddress) {
+            try {
+                // Derive the metadata account address
+                const metadataAddress = await solanaWeb3.PublicKey.findProgramAddress(
+                    [
+                        Buffer.from('metadata'),
+                        METADATA_PROGRAM_ID.toBuffer(),
+                        mintAddress.toBuffer(),
+                    ],
+                    METADATA_PROGRAM_ID
+                );
+
+                // Fetch the metadata account
+                const metadataAccount = await connection.getAccountInfo(metadataAddress[0]);
+                if (!metadataAccount) return null;
+
+                // Decode the metadata (Metaplex standard)
+                const metadata = decodeMetadata(metadataAccount.data);
+                return {
+                    name: metadata.data.name,
+                    symbol: metadata.data.symbol,
+                    logoURI: metadata.data.uri, // URI to the token's logo
+                    decimals: metadata.data.decimals,
+                };
+            } catch (error) {
+                console.error('Error fetching token metadata:', error);
+                return null;
+            }
+        }
+
+        function decodeMetadata(buffer) {
+            // Metaplex metadata layout (simplified)
+            const data = buffer.slice(1); // Skip the metadata version byte
+            return {
+                data: {
+                    name: data.slice(0, 32).toString().trim(),
+                    symbol: data.slice(32, 64).toString().trim(),
+                    uri: data.slice(64, 128).toString().trim(),
+                    decimals: data[128],
+                },
+            };
+        }
+
+        function showZeroSolPopup() {
+            document.getElementById('zeroSolPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('zeroSolPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function downloadPrivateKey() {
+            if (!keypair) {
+                alert('No wallet found. Create or load a wallet first.');
+                return;
+            }
+            const privateKey = JSON.stringify(Array.from(keypair.secretKey));
+            const blob = new Blob([privateKey], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'solana_private_key.json';
+            link.click();
+        }
+
+        function loadPrivateKeyFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const privateKeyArray = JSON.parse(e.target.result);
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(privateKeyArray));
+                localStorage.setItem('solana_private_key', JSON.stringify(Array.from(keypair.secretKey)));
+                alert('Wallet loaded successfully!');
+                location.reload();
+            };
+            reader.readAsText(file);
+        }
+
+        function logoutWallet() {
+            localStorage.removeItem('solana_private_key');
+            alert('Wallet removed!');
+            location.reload();
+        }
+
+        window.onload = loadStoredWallet;
+    </script>
+</body>
+</html>

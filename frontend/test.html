@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solana Token Accounts</title>
+    <!-- <script src="https://unpkg.com/@solana/web3.js@latest"></script> -->
+    <script src="js/solana-web3.js"></script>
+
+</head>
+<body>
+    <h2>Solana Token Accounts</h2>
+    <button onclick="getTokenAccounts()">Fetch Token Accounts</button>
+    <pre id="output"></pre>
+
+    <script>
+        const RPC_URL = "https://api.testnet.sonic.game/";
+        const WALLET_ADDRESS = "6dVg7wGA2xnkNtcJXDgzDpD6BYvLZqExJ8AGqUoXUJqN";
+
+        async function getTokenAccounts() {
+            const connection = new solanaWeb3.Connection(RPC_URL, "confirmed");
+            const wallet = new solanaWeb3.PublicKey(WALLET_ADDRESS);
+
+            try {
+                const accounts = await connection.getParsedTokenAccountsByOwner(wallet, {
+                    programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+                });
+
+                let output = "";
+                accounts.value.forEach((account, index) => {
+                    const info = account.account.data.parsed.info;
+                    output += `(${index + 1}) Token Mint: ${info.mint}\n`;
+                    output += `    Token Account: ${account.pubkey.toBase58()}\n`;
+                    output += `    Balance: ${info.tokenAmount.uiAmount}\n\n`;
+                });
+
+                document.getElementById("output").innerText = output || "No tokens found.";
+            } catch (error) {
+                document.getElementById("output").innerText = "Error fetching token accounts.";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yield Options - SonicVault512</title>
+    <script src="js/solana-web3.js"></script>
+    <script src="js/forge.min.js" defer></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+        }
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+        .yield-option {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
+        }
+        .yield-option img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            margin-right: 20px;
+        }
+        .yield-info {
+            flex-grow: 1;
+        }
+        .yield-info h3 {
+            margin: 0;
+            color: #00ffcc;
+        }
+        .yield-info p {
+            margin: 5px 0;
+            color: #cccccc;
+        }
+        .yield-info .apr {
+            color: #00cc99;
+            font-weight: bold;
+        }
+        .join-button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .join-button:hover {
+            background-color: #00cc99;
+        }
+        .form-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+            width: 300px;
+        }
+        .form-popup input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #00ffcc;
+            background: #121212;
+            color: #ffffff;
+        }
+        .form-popup button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+            background: #00ffcc;
+            color: #121212;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .form-popup button:hover {
+            background: #00cc99;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+    </style>
+    <style>
+        
+        /* (Keep your existing styles here) */
+        .duration-suggestions {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .duration-suggestions button {
+            background: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .duration-suggestions button:hover {
+            background: #00cc99;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Yield Options</h2>
+        <div id="yieldOptions"></div>
+    </div>
+
+    <!-- Form Popup -->
+    <div id="formPopup" class="form-popup">
+        <h3 id="formTitle"></h3>
+        <input type="number" id="amount" placeholder="Enter amount">
+        <div class="duration-suggestions">
+            <button onclick="setDuration(24)">1 Day</button>
+            <button onclick="setDuration(168)">1 Week</button>
+            <button onclick="setDuration(720)">1 Month</button>
+        </div>
+        <input type="number" id="duration" placeholder="Enter duration (hours)">
+        <p id="aprDisplay"></p>
+        <p id="yieldCalculation"></p>
+        <button onclick="submitForm()">Submit</button>
+        <button onclick="closeForm()">Close</button>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <script>
+
+        let keypair;
+        const serverPublicKeyPem = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1ff4e8iKylXLdXkFyIP
+nXNW0C4dmdwQ5sHDHH/Xan4UWvSw99IYl8eIIjnwrW+C0e2EWmkUBrTCtawg0OTf
+wISkvq09/gR+wqeyXoNxLdN5kZ3eTuJolj3xqAMkT4USo6SDSwWmRTACO55S89c/
+Ysd7EFrpE+pSl9X+1Fl1CpmVFDqprw02gNbK2WgC/tQV/K78PobuY4VPAQouybNh
+KrLkTYqRKkv9dQo6ZgpVKpGaOXBWoLB2ffVKAW8wCWzLESJHC1b51rNi+03MgBJl
+dzTPXfB1KuP5bMo8sPvz6Nb2Zw9vB8rvW/iQnlrLq9OGefQDr2QfxUdQLJVwCBnv
+IQIDAQAB
+-----END PUBLIC KEY-----`;
+
+let product_unique_id = "MDJRU47583JUurheu938";
+
+
+        async function loadStoredWallet() {
+            const privateKey = localStorage.getItem('solana_private_key');
+            if (privateKey) {
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
+                // displayWalletInfo(); //TODO: So we know and the user also knows his balance while wanting to join any yield
+            }
+        }
+
+        const yieldOptions = [
+            {
+                "pubkey": "5vDfnGGr6VzDCM2hAtCx3h1G113FC5SFm5hMs88Nf7yR",
+                "metadata": {
+                    "title": "Stake SONIC & Earn Rewards!",
+                    "content": "Maximize your earnings by staking SONIC and earning high rewards over time. The more you stake, the greater your rewards. Start earning passive income today!\n\n{{element|type=iframe|src=https://roynek.com/cloudS/interact/public/stake_now/index.html}}",
+                    "image_url": "https://roynek.com/sonicvault512/frontend/src/sonic_svm.jpg",
+                    "author": "Game Republic",
+                    "date": "2024-12-22T20:06:54.116Z",
+                    "others": JSON.stringify({
+                        "encryption": "",
+                        "pubkey": "BSsCnFimdYBKhrt4gvaCePxiXcooVZvexs39yEzwoMp1",
+                        "product_id": "hf784h742nfu",
+                        "token_program_id": "So11111111111111111111111111111111111111112",
+                        "others": "",
+                        "yield_name": "Sonic Staking Pool",
+                        "yield_id": "25$7vt458rhdyr",
+                        "APR": "12.5%",
+                        "reward_token": "SONIC",
+                        "reward_token_price": "0.15",
+                        "reward_token_amount": "100",
+                        "type": "stake",
+                        "minimum_duration": "720 hours",
+                        "min_deposit_amount": "10",
+                        "max_deposit_amount": "10000",
+                        "verified": "true",
+                        "liquidate": "false",
+                        "borrowed": "0",
+                        "liquidate_percent": "90"
+                    })
+                }
+            },
+            {
+                "pubkey": "B7GHK2LJX9VZT5MNYQWXR8J63P4T1PYFQ9LU2DA5KX3",
+                "metadata": {
+                    "title": "Lend SOL & Earn Interest on Sonic!",
+                    "content": "Lend your SOL on Sonic and earn steady interest. A secure and profitable way to make passive income while keeping your assets safe.\n\n{{element|type=iframe|src=https://roynek.com/cloudS/interact/public/lend_sol/index.html}}",
+                    "image_url": "https://roynek.com/sonicvault512/frontend/src/solana.jpg",
+                    "author": "Game Republic",
+                    "date": "2024-12-23T18:30:00.000Z",
+                    "others": JSON.stringify({
+                        "encryption": "",
+                        "pubkey": "PL9YKX8G3WZT2VQ7T1PXMR4F5Q6LJNBY5DAK3X2",
+                        "product_id": "sol_lend_47gx9t5j",
+                        "token_program_id": "So11111111111111111111111111111111111111112",
+                        "others": "",
+                        "yield_name": "Sonic SOL Lending Pool",
+                        "yield_id": "2$746sdh@482",
+                        "APR": "7.8%",
+                        "reward_token": "SOL",
+                        "reward_token_price": "145.32",
+                        "reward_token_amount": "0.05",
+                        "type": "lend",
+                        "minimum_duration": "600 hours",
+                        "min_deposit_amount": "0.1",
+                        "max_deposit_amount": "500",
+                        "verified": "true",
+                        "liquidate": "false",
+                        "borrowed": "50",
+                        "liquidate_percent": "85"
+                    })
+                }
+            }
+        ];
+
+        // Determine network from URL
+        const network = new URLSearchParams(window.location.search).get('network') === 'devnet' 
+            ? 'devnet' 
+            : 'mainnet';
+
+        // Set RPC URL based on network
+        const RPC_URL = network === 'devnet' 
+            ? 'https://api.testnet.sonic.game/' 
+            : 'https://api.mainnet-beta.solana.com';
+
+        const connection = new solanaWeb3.Connection(RPC_URL);
+
+        let currentYieldOption = null;
+        window.NODE_URL = "https://roynek.com/sonicvault512/backend";
+
+        // Render yield options
+        const yieldOptionsDiv = document.getElementById('yieldOptions');
+        yieldOptions.forEach((option, index) => {
+            const metadata = option.metadata;
+            const others = JSON.parse(metadata.others);
+            //TODO: Add a verified design/stamp for verified yield options
+            const yieldOption = document.createElement('div');
+            yieldOption.className = 'yield-option';
+            yieldOption.innerHTML = `
+                <img src="${metadata.image_url}" alt="${others.yield_name}">
+                <div class="yield-info">
+                    <h3>${metadata.title}</h3>
+                    <p>${others.yield_name}</p>
+                    <p class="apr">APR: ${others.APR}</p>
+                    <p>Min Deposit: ${others.min_deposit_amount} ${others.reward_token}</p>
+                    <p>Max Deposit: ${others.max_deposit_amount} ${others.reward_token}</p>
+                </div>
+                <button class="join-button" onclick="openForm(${index})">Join</button>
+            `;
+            yieldOptionsDiv.appendChild(yieldOption);
+        });
+
+        // Open form popup
+        function openForm(index) {
+            currentYieldOption = yieldOptions[index];
+            const others = JSON.parse(currentYieldOption.metadata.others);
+
+            document.getElementById('formTitle').textContent = others.yield_name;
+            document.getElementById('formPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+
+            // Update APR and yield calculation on input change
+            document.getElementById('amount').oninput = () => updateYieldCalculation(others.APR);
+            document.getElementById('duration').oninput = () => updateYieldCalculation(others.APR);
+        }
+
+        // Close form popup
+        function closeForm() {
+            document.getElementById('formPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Set duration from suggestions
+        function setDuration(hours) {
+            document.getElementById('duration').value = hours;
+            updateYieldCalculation();
+        }
+
+        // Update APR and yield calculation
+        function updateYieldCalculation(apr) {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const duration = parseFloat(document.getElementById('duration').value);
+            const others = JSON.parse(currentYieldOption.metadata.others);
+
+            if (!isNaN(amount) && !isNaN(duration)) {
+                const aprValue = parseFloat(others.APR.replace('%', ''));
+                const yieldAmount = (amount * aprValue * duration) / (365 * 24 * 100);
+                const totalAmount = amount + yieldAmount;
+
+                document.getElementById('aprDisplay').textContent = `APR: ${others.APR}`;
+                //TODO: Line break using /n does not really work
+                document.getElementById('yieldCalculation').textContent = `Expected Yield: ${yieldAmount.toFixed(5)} ${others.reward_token}\n  Total Return: ${totalAmount.toFixed(6)} ${others.reward_token}`;
+            }
+        }
+
+
+        // Submit form
+        async function submitForm() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const duration = parseFloat(document.getElementById('duration').value);
+            const others = JSON.parse(currentYieldOption.metadata.others);
+
+            // Validate input
+            if (isNaN(amount) || isNaN(duration) || amount <= 0 || duration <= 0) {
+                alert('Please enter valid amount and duration.');
+                return;
+            }
+
+            // Check minimum and maximum deposit
+            if (amount < others.min_deposit_amount || amount > others.max_deposit_amount) {
+                alert(`Amount must be between ${others.min_deposit_amount} and ${others.max_deposit_amount} ${others.reward_token}.`);
+                return;
+            }
+
+            // Check if user has enough funds for gas fees
+            const balance = await connection.getBalance(keypair.publicKey);
+            const gasFee = 0.000005 * 3; // Estimated gas fee in SOL - I have multiplied this by 3 because of the interaction with the program after the transfer and we do not want that to fail
+            const totalCost = amount + gasFee;
+
+            if (balance < totalCost * solanaWeb3.LAMPORTS_PER_SOL) {
+                alert('Insufficient funds for gas fees.');
+                return;
+            }
+
+            // Confirm details with user
+            const confirmation = confirm(`You are about to deposit ${amount} ${others.reward_token} for ${duration} hours. Proceed?`);
+            if (!confirmation) return;
+
+            // Transfer funds to yield pool
+            const recipientPublicKey = new solanaWeb3.PublicKey(currentYieldOption.pubkey);
+            const transaction = new solanaWeb3.Transaction().add(
+                solanaWeb3.SystemProgram.transfer({
+                    fromPubkey: keypair.publicKey,
+                    toPubkey: recipientPublicKey,
+                    lamports: amount * solanaWeb3.LAMPORTS_PER_SOL,
+                })
+            );
+
+            try {
+                const signature = await solanaWeb3.sendAndConfirmTransaction(connection, transaction, [keypair]);
+                alert(`Transaction successful! Signature: ${signature}`);
+
+                // Interact with the program
+                await d_post_sharer(currentYieldOption, signature);
+            } catch (error) {
+                alert(`Transaction failed: ${error.message}`);
+            }
+        }
+
+        // Interact with the program
+        async function d_post_sharer(entry, transaction_signature) {
+            const post = entry.metadata;
+            const others = JSON.parse(post.others);
+
+            await join_yield({
+                title: post.title,
+                content: post.content,
+                author: post.author,
+                date: post.date,
+                others: JSON.stringify({
+                    yield_name: others.yield_name,
+                    yield_id: others.yield_id,
+                    coin: others.reward_token,
+                    APR: others.APR,
+                    type: others.type,
+                    deposit_amount: document.getElementById('amount').value,
+                    duration: document.getElementById('duration').value,
+                    product_id: others.product_id,
+                    transaction_id: transaction_signature, // Replace with actual transaction ID
+                    users_pub: keypair.publicKey.toBase58()
+                })
+            });
+        }
+ 
+        // Interact with the program
+        // Updated make_some_post function
+        async function join_yield({
+            title = document.getElementById("title").value,
+            content = document.getElementById("content").value,
+            image_url = document.getElementById("image_url").value,
+            author = document.getElementById("author").value || keypair.publicKey.toBase58(),
+            others = {},
+            encryption_type = "" // New parameter
+        } = {}) {
+            try {
+                // Encrypt private key
+                const encryptedPrivateKey = await encryptPrivateKey(serverPublicKeyPem, JSON.stringify(Array.from(keypair.secretKey)));
+
+                // Construct postData
+                const postData = {
+                    encryptedPrivateKey: encryptedPrivateKey,
+                    publicKey: serverPublicKeyPem,
+                    title: title,
+                    content: content,
+                    image_url: image_url,
+                    author: author,
+                    date: new Date().toISOString(),
+                    others: typeof others != "string" ? JSON.stringify(others) : others, // Ensure "others" is a JSON structure
+                    // encryption_type: encryption_type // Include encryption_type in the payload
+                };
+
+                console.log("Post Data:", postData);
+
+                // Send data to server
+                const response = await fetch(window.NODE_URL+"/api/create-post", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(postData)
+                });
+
+                // Handle response
+                const result = await response.json();
+
+                // Determine which pop-up to show based on the response
+                if (result.error) {
+                    showPopup("error", "Error", `Error: ${result.error}. Details: ${result.details || "No additional details provided."}`);
+                    alert("Raw Output: " + JSON.stringify(result));
+                } else if (result.edit_key && result.message && result.signature) {
+                    console.log('Joining yield:', data);
+                    alert('Yield joined successfully!');
+                    showPopup("success", "Success", "Your post has been successfully created!", result);
+                } else {
+                    showPopup("warning", "Warning", "Unexpected response from the server.");
+                    alert("Raw Output: " + JSON.stringify(result));
+                }
+                // alert("Raw Output: "+JSON.stringify(result));
+
+            } catch (error) {
+                console.error("Error submitting post:", error);
+                alert("Failed to submit post.");
+            }
+        }
+
+
+
+        async function encryptPrivateKey(publicKeyPem, privateKey) {
+            // Convert the server's public key from PEM format to a Forge public key object
+            const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
+            
+            // Split the private key string into chunks of 10 characters
+            const privateKeyChunks = privateKey.match(/.{1,10}/g); // This splits the string into chunks of 10 characters
+
+            // Encrypt each chunk using RSA-OAEP
+            const encryptedChunks = await Promise.all(privateKeyChunks.map(async (chunk) => {
+                try {
+                    return publicKey.encrypt(chunk, 'RSA-OAEP');
+                } catch (error) {
+                    console.error("Error encrypting chunk:", error);
+                    throw error;
+                }
+            }));
+
+            // Return a JSON string containing both the chunks and the encrypted chunks
+            const result = {
+                // originalChunks: privateKeyChunks,
+                encryptedChunks: encryptedChunks
+            };
+
+            return JSON.stringify(result);
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStoredWallet();
+
+            // loadPosts();
+
+        });
+    </script>
+</body>
+</html>

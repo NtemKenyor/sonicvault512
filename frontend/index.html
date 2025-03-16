@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SonicVault512 - Your DeFi Hub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+        }
+        header {
+            background-color: #1e1e1e;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        header img {
+            height: 50px;
+        }
+        nav {
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        nav ul li {
+            margin: 10px 15px;
+        }
+        nav ul li a {
+            color: #00ffcc;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        nav ul li a:hover {
+            background-color: #00ffcc;
+            color: #121212;
+        }
+        main {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
+        }
+        footer {
+            background-color: #1e1e1e;
+            padding: 10px;
+            width: 100%;
+            position: relative;
+            margin-top: 20px;
+        }
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <script>
+        function navigateTo(page) {
+            window.location.href = page;
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <img src="src/logo.webp" alt="SonicVault512 Logo">
+        <nav>
+            <ul>
+                <li><a href="#" onclick="navigateTo('wallet.html')">Wallet</a></li>
+                <li><a href="#" onclick="navigateTo('stake.html')">Stake</a></li>
+                <li><a href="#" onclick="navigateTo('yield.html')">Yield</a></li>
+                <li><a href="#" onclick="navigateTo('fun.html')">Fun</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Welcome to SonicVault512</h2>
+            <p>Your DeFi hub on Sonic SVM for staking, yielding, and gaming.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 SonicVault512. All rights reserved.</p>
+    </footer>
+</body>
+</html>
