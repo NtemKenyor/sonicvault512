@@ -63,16 +63,17 @@ Found a bug or have a suggestion? We encourage you to create an issue to help us
 
 ## 📜 License
 
-SonicVault512 is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
+SonicVault512 is licensed under the **CCO License**. See the [LICENSE](LICENSE) file for more details.
 
 ---
 
 ## 🌐 Connect With Us
 
-- **Website**: [https://sonicvault512.com](https://sonicvault512.com)
+- **Website**: [https://sonicvault512.com](https://roynek.com/sonicvault512/frontend/)
 - **Twitter**: [@SonicVault512](https://twitter.com/SonicVault512)
-- **Discord**: [Join our Discord](https://discord.gg/your-invite-link)
-- **Email**: support@sonicvault512.com
+<!-- - **Discord**: [Join our Discord](https://discord.gg/your-invite-link)
+- **Email**: support@sonicvault512.com -->
+- **Ntem, Kenyor** - Lead - Web3 Expert - [X (Twitter)](https://x.com/NKenyor)
 
 ---
 
