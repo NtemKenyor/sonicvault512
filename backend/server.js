@@ -27,7 +27,7 @@ const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY; // API key from .env file
 // DeepSeek API endpoint
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Replace with actual DeepSeek API URL
 
-console.log(DEEPSEEK_API_KEY);
+// console.log(DEEPSEEK_API_KEY);
 
 
 let MAIN_DIR = "/sonicvault512/backend";
@@ -131,6 +131,26 @@ app.get(MAIN_DIR+'/', (req, res) => {
 app.get(MAIN_DIR+"/api/metadata", async (req, res) => {
     const network_pref = req.query.network; // Extract the network parameter
     console.log("Received network:", network_pref);
+
+    // set the preferred network from users-end
+    if(network_pref != null){
+        dNetwork = network_pref;
+    }
+
+    // Get the first available RPC endpoint for the specified network
+    const rpcUrl = await getAvailableRpcEndpoint(dNetwork);
+    // const connection = new Connection(rpcUrl, 'confirmed');
+
+    const metadata = await fetchMetadataForAccounts(rpcUrl, dNetwork);
+    res.json(metadata);
+});
+
+
+app.get(MAIN_DIR+"/api/user-yields", async (req, res) => {
+    const data = req.query;
+    const network_pref = data.network; // Extract the network parameter
+    console.log("Received network:", network_pref);
+    const wallet_address = data.user; //public wallet address of the user
 
     // set the preferred network from users-end
     if(network_pref != null){
@@ -260,7 +280,8 @@ app.post(MAIN_DIR+"/api/create-post", async (req, res) => {
 
         // Proceed to create the post on the blockchain
         const {signature, program_account} = await createPost(userKeypair, metadata, rpcUrl, dNetwork);
-        res.json({ status: "True", message: "Post created successfully", edit_key: program_account, signature });
+        // res.json({ status: "True", message: "Post created successfully", edit_key: program_account, signature });
+        res.json({ status: "True", message: "Post created successfully", signature });
         
     } catch (err) {
         console.error("Error creating post:", err);

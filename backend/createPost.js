@@ -41,66 +41,6 @@ function getUtcTimestamp() {
     return new Date().toISOString(); // ISO string format in UTC
 }
 
-/* 
-async function createPost(userKeypair, metadata, network="mainnet") {
-    const postAccount = Keypair.generate();
-    const metadataWithUtc = new PostMetadata(metadata); // Ensure date defaults to UTC if not provided
-
-    // const connection = (network === "localhost" || network === "development") 
-    // ? new Connection("http://127.0.0.1:8899", "confirmed")
-    // : new Connection("https://spring-quick-surf.solana-devnet.quiknode.pro/016ff48f0f7c3f1520e515c01dca9a83ef528317", "confirmed");
-
-    //https://spring-quick-surf.solana-devnet.quiknode.pro/016ff48f0f7c3f1520e515c01dca9a83ef528317
-    // Serialize the metadata with the timestamp
-    // const connection =new Connection("http://127.0.0.1:8899", "confirmed");
-    // console.log("creating post: ", network );
-    // const connection = new Connection("https://spring-quick-surf.solana-devnet.quiknode.pro/016ff48f0f7c3f1520e515c01dca9a83ef528317", "confirmed");
-    const connection = new Connection("", "confirmed");
-
-
-    const serializedMetadata = serialize(postMetadataSchema, metadataWithUtc);
-
-    // console.log(connection);
-    // Create the account and store metadata on the blockchain
-    const createPostTx = new Transaction().add(
-        SystemProgram.createAccount({
-            fromPubkey: userKeypair.publicKey,
-            newAccountPubkey: postAccount.publicKey,
-            lamports: await connection.getMinimumBalanceForRentExemption(serializedMetadata.length),
-            space: serializedMetadata.length,
-            programId: programId,
-        })
-    );
-
-    const { blockhash } = await connection.getLatestBlockhash("confirmed");
-    createPostTx.recentBlockhash = blockhash;
-    createPostTx.feePayer = userKeypair.publicKey;
-
-
-    // Add the serialized data to the transaction
-    createPostTx.add({
-        keys: [
-            { pubkey: postAccount.publicKey, isSigner: false, isWritable: true },
-            { pubkey: userKeypair.publicKey, isSigner: true, isWritable: false },
-        ],
-        programId,
-        data: Buffer.from(serializedMetadata),
-    });
-
-    // Sign and send the transaction
-    const signature = await connection.sendTransaction(createPostTx, [userKeypair, postAccount]);
-    // await connection.confirmTransaction(signature);
-    await connection.confirmTransaction(signature, "confirmed");
-
-    return {
-        signature: signature,
-        program_account: JSON.stringify(Array.from(postAccount.secretKey)),
-        // state: true,
-    };
-    
-    
-}
- */
 
 async function createPost(userKeypair, metadata, rpcUrl, network) {
     const postAccount = Keypair.generate();
@@ -157,6 +97,67 @@ async function createPost(userKeypair, metadata, rpcUrl, network) {
         program_account: JSON.stringify(Array.from(postAccount.secretKey)),
     };
 }
+
+
+/* async function createPost(userKeypair, metadata, rpcUrl, network) {
+        const [postAccount, bump] = await PublicKey.findProgramAddress(
+            [Buffer.from("post"), userKeypair.publicKey.toBuffer()],
+            programId
+        );
+    
+        const metadataWithUtc = new PostMetadata(metadata); // Ensure date defaults to UTC if not provided
+    
+        // Use devnet program_id if network is devnet
+        if (network === "devnet" || network === "dev") {
+            programId = devProgramId;
+        }
+    
+        console.log("The network at Run: " + network);
+        console.log("The RPC at Run: " + rpcUrl);
+        console.log("The Program id: " + programId);
+    
+        const connection = new Connection(rpcUrl, "confirmed");
+        console.log(`Using RPC endpoint: ${rpcUrl}`);
+    
+        // Serialize the metadata with the timestamp
+        const serializedMetadata = serialize(postMetadataSchema, metadataWithUtc);
+    
+        // Create the account and store metadata on the blockchain
+        const createPostTx = new Transaction().add(
+            SystemProgram.createAccount({
+                fromPubkey: userKeypair.publicKey,
+                newAccountPubkey: postAccount, // ✅ Correct: Use postAccount directly
+                lamports: await connection.getMinimumBalanceForRentExemption(serializedMetadata.length),
+                space: serializedMetadata.length,
+                programId: programId,
+            })
+        );
+    
+        const { blockhash } = await connection.getLatestBlockhash("confirmed");
+        createPostTx.recentBlockhash = blockhash;
+        createPostTx.feePayer = userKeypair.publicKey;
+    
+        // Add the serialized data to the transaction
+        createPostTx.add({
+            keys: [
+                { pubkey: postAccount, isSigner: false, isWritable: true }, // ✅ FIX: PDA is NOT a signer
+                { pubkey: userKeypair.publicKey, isSigner: true, isWritable: false },
+            ],
+            programId,
+            data: Buffer.from(serializedMetadata),
+        });
+    
+        // Sign and send the transaction
+        const signature = await connection.sendTransaction(createPostTx, [userKeypair]);
+        await connection.confirmTransaction(signature, "confirmed");
+    
+        return {
+            signature: signature,
+            program_account: postAccount.toString(), // ✅ Correct: No secretKey for PDA, return publicKey instead
+        };
+}    */ 
+    
+    
 
 
 module.exports = { createPost };

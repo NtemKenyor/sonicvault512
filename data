@@ -1,0 +1,69 @@
+1) stake_hub
+coin
+APR
+
+minumum_days
+min_deposit_amount
+max_deposit_amount
+
+
+2) Set up
+yield_name 
+coin
+APR 
+reward_token
+reward_token_price
+reward_token_amount
+
+type: (stake or yield)
+minimum_duration
+min_deposit_amount 
+max_deposit_amount 
+
+
+
+3) Participator
+yield_name
+yield_id
+coin
+APR 
+reward_token
+reward_token_amount()
+reward_token_id
+receiving_token_id
+transaction_id
+type: (stake or yield)
+deposit_amount
+duration(in hours)
+distribution: at_end
+
+
+{
+    "pubkey": "5vDfnGGr6VzDCM2hAtCx3h1G113FC5SFm5hMs88Nf7yR",
+    "metadata": {
+        "title": "Stake SONIC & Earn Rewards!",
+        "content": "Maximize your earnings by staking SONIC and earning high rewards over time. The more you stake, the greater your rewards. Start earning passive income today!\n\n{{element|type=iframe|src=https://roynek.com/cloudS/interact/public/stake_now/index.html}}",
+        "image_url": "",
+        "author": "Game Republic",
+        "date": "2024-12-22T20:06:54.116Z",
+        "others": JSON.stringify({
+            "encryption": "",
+            "pubkey": "BSsCnFimdYBKhrt4gvaCePxiXcooVZvexs39yEzwoMp1",
+            "product_id": "75hfru%r47gjtu5jreno4",
+            "others": "",
+            "yield_name": "Sonic Staking Pool",
+            "APR": "12.5%",
+            "reward_token": "SONIC",
+            "reward_token_price": "0.15",
+            "reward_token_amount": "100",
+            "type": "stake",
+            "minimum_duration": "720 hours",
+            "min_deposit_amount": "10",
+            "max_deposit_amount": "10000", "verified": "true", "liquidate": "false", "borrowed": "0",  "liquidate_percent": "90"
+
+        })
+    }
+}
+
+given the example above, add more making some variations. make it  3.
+

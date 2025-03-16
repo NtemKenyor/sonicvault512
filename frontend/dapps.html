@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAO/DeFi - SonicVault512</title>
+    <link rel="icon" type="image/webp" href="src/logo.webp">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            text-align: center;
+        }
+        h1 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+        .category {
+            margin-bottom: 30px;
+        }
+        .category h2 {
+            color: #00ffcc;
+            margin-bottom: 15px;
+        }
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .app-card {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+        }
+        .app-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .app-card h3 {
+            margin: 0;
+            color: #00ffcc;
+            font-size: 18px;
+        }
+        .app-card p {
+            margin: 5px 0;
+            color: #cccccc;
+            text-align: center;
+            font-size: 14px;
+        }
+        .iframe-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 80%;
+            background: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 15px;
+        }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .close-button:hover {
+            background: #00cc99;
+        }
+        .add-button {
+            background: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .add-button:hover {
+            background: #00cc99;
+        }
+        .add-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+        }
+        .add-form input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #00ffcc;
+            background: #121212;
+            color: #ffffff;
+        }
+        .add-form button {
+            background: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .add-form button:hover {
+            background: #00cc99;
+        }
+    </style>
+    <style>
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 12px;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            /* background-color: #bdbcbc; */
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+            
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                /* flex-direction: column; */
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+    </style>
+
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <img src="src/logo.webp" alt="SonicVault512 Logo" class="logo">
+        <nav>
+            <a href="javascript:void(0);" onclick="navigateWithParams('wallet.html')" class="active">Wallet</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('yield.html')">Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('user_yield.html')">User Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('dapps.html')">DApps</a>
+        </nav>
+    </header>
+
+
+    <div class="container">
+        <h1>DAO/DeFi Apps</h1>
+        <div id="categories"></div>
+        <button class="add-button" onclick="showAddForm()">Add App</button>
+    </div>
+
+    <!-- Iframe Container -->
+    <div class="iframe-container">
+        <button class="close-button" onclick="closeIframe()">X</button>
+        <iframe id="app-iframe" src=""></iframe>
+    </div>
+
+    <!-- Add Form -->
+    <div class="add-form">
+        <input type="text" id="app-url" placeholder="Enter App URL">
+        <button onclick="addApp()">Add</button>
+        <button onclick="closeAddForm()">Close</button>
+    </div>
+
+    <script>
+        // JSON structure for apps
+        const apps = [
+            {
+                category: "DAO/DeFi",
+                apps: [
+                    {
+                        title: "Sonic Bridge",
+                        description: "Bridge assets between Sonic SVM and other networks.",
+                        image: "https://roynek.com/sonicvault512/frontend/src/sonic_svm.jpg",
+                        url: "https://bridge.sonic.game/"
+                    },
+                    {
+                        title: "Sonic Explorer",
+                        description: "Explore transactions and blocks on Sonic SVM.",
+                        image: "https://roynek.com/sonicvault512/frontend/src/sonic_svm.jpg",
+                        url: "https://explorer.sonic.game/"
+                    },
+                    {
+                        title: "Sonic Faucet",
+                        description: "Get test tokens for Sonic SVM.",
+                        image: "https://roynek.com/sonicvault512/frontend/src/sonic_svm.jpg",
+                        url: "https://faucet.sonic.game/#/"
+                    },
+                    {
+                        title: "Nexus",
+                        description: "Hyperlane Nexus for cross-chain messaging.",
+                        image: "https://roynek.com/sonicvault512/frontend/src/hypernexus.png",
+                        url: "https://www.usenexus.org/"
+                    }
+                ]
+            },
+            {
+                category: "Games",
+                apps: [
+                    {
+                        title: "Sonic Runner",
+                        description: "A fast-paced endless runner game on Sonic SVM.",
+                        image: "https://roynek.com/sonicvault512/frontend/src/solana.jpg",
+                        url: "https://roynek.com/Safe-Journey/"
+                    }
+                ]
+            },
+            {
+                category: "Airdrop",
+                apps: [
+                    {
+                        title: "Coming Soon",
+                        description: "Stay tuned for exciting airdrop opportunities!",
+                        image: "https://roynek.com/sonicvault512/frontend/src/logo.webp",
+                        url: "#"
+                    }
+                ]
+            }
+        ];
+
+        // Render categories and apps
+        const categoriesDiv = document.getElementById('categories');
+        apps.forEach(category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+            categoryDiv.innerHTML = `<h2>${category.category}</h2>`;
+            const appsGrid = document.createElement('div');
+            appsGrid.className = 'apps-grid';
+            categoryDiv.appendChild(appsGrid);
+
+            category.apps.forEach(app => {
+                const appCard = document.createElement('div');
+                appCard.className = 'app-card';
+                appCard.innerHTML = `
+                    <img src="${app.image}" alt="${app.title}">
+                    <h3>${app.title}</h3>
+                    <p>${app.description}</p>
+                `;
+                appCard.addEventListener('click', () => openIframe(app.url));
+                appsGrid.appendChild(appCard);
+            });
+
+            categoriesDiv.appendChild(categoryDiv);
+        });
+
+        // Open iframe
+        function openIframe(url) {
+            const iframeContainer = document.querySelector('.iframe-container');
+            const iframe = document.getElementById('app-iframe');
+            iframe.src = url;
+            iframeContainer.style.display = 'block';
+        }
+
+        // Close iframe
+        function closeIframe() {
+            const iframeContainer = document.querySelector('.iframe-container');
+            iframeContainer.style.display = 'none';
+        }
+
+        // Show add form
+        function showAddForm() {
+            document.querySelector('.add-form').style.display = 'block';
+        }
+
+        // Close add form
+        function closeAddForm() {
+            document.querySelector('.add-form').style.display = 'none';
+        }
+
+        // Add new app
+        function addApp() {
+            const url = document.getElementById('app-url').value;
+            if (url) {
+                const newApp = {
+                    title: "Custom App",
+                    description: "User-added app.",
+                    image: "https://roynek.com/sonicvault512/frontend/src/sonic_svm.jpg",
+                    url: url
+                };
+
+                // Add to the first category (or create a new category)
+                if (apps.length > 0) {
+                    apps[0].apps.push(newApp);
+                } else {
+                    apps.push({
+                        category: "Custom",
+                        apps: [newApp]
+                    });
+                }
+
+                // Re-render the page
+                categoriesDiv.innerHTML = '';
+                apps.forEach(category => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'category';
+                    categoryDiv.innerHTML = `<h2>${category.category}</h2>`;
+                    const appsGrid = document.createElement('div');
+                    appsGrid.className = 'apps-grid';
+                    categoryDiv.appendChild(appsGrid);
+
+                    category.apps.forEach(app => {
+                        const appCard = document.createElement('div');
+                        appCard.className = 'app-card';
+                        appCard.innerHTML = `
+                            <img src="${app.image}" alt="${app.title}">
+                            <h3>${app.title}</h3>
+                            <p>${app.description}</p>
+                        `;
+                        appCard.addEventListener('click', () => openIframe(app.url));
+                        appsGrid.appendChild(appCard);
+                    });
+
+                    categoriesDiv.appendChild(categoryDiv);
+                });
+
+                closeAddForm();
+            }
+        }
+
+        function navigateWithParams(page) {
+            // Get the current query parameters from the URL
+            const currentParams = window.location.search;
+
+            // Construct the new URL with the target page and current parameters
+            const newUrl = `${page}${currentParams}`;
+            // Navigate to the new URL
+            window.location.href = newUrl;
+        }
+
+
+    </script>
+</body>
+</html>

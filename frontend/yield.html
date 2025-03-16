@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yield Options - SonicVault512</title>
     <script src="js/solana-web3.js"></script>
+    <script src="js/yield_options.js"></script>
     <script src="js/forge.min.js" defer></script>
+    <link rel="icon" type="image/webp" href="src/logo.webp">
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -122,8 +124,16 @@
         }
     </style>
     <style>
-        
         /* (Keep your existing styles here) */
+        .verified-badge {
+            background-color: #00cc99;
+            color: #121212;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
         .duration-suggestions {
             display: flex;
             gap: 10px;
@@ -142,8 +152,102 @@
             background: #00cc99;
         }
     </style>
+
+    <style>
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 12px;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            /* background-color: #bdbcbc; */
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+            
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                /* flex-direction: column; */
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
+    <header>
+        <img src="src/logo.webp" alt="SonicVault512 Logo" class="logo">
+        <nav>
+            <a href="javascript:void(0);" onclick="navigateWithParams('wallet.html')" class="active">Wallet</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('yield.html')">Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('user_yield.html')">User Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('dapps.html')">DApps</a>
+        </nav>
+    </header>
+
+
     <div class="container">
         <h2>Yield Options</h2>
         <div id="yieldOptions"></div>
@@ -152,6 +256,7 @@
     <!-- Form Popup -->
     <div id="formPopup" class="form-popup">
         <h3 id="formTitle"></h3>
+        <p id="walletBalance">Wallet Balance: -- SOL</p>
         <input type="number" id="amount" placeholder="Enter amount">
         <div class="duration-suggestions">
             <button onclick="setDuration(24)">1 Day</button>
@@ -167,7 +272,6 @@
     <div id="overlay" class="overlay"></div>
 
     <script>
-
         let keypair;
         const serverPublicKeyPem = `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1ff4e8iKylXLdXkFyIP
@@ -179,18 +283,23 @@ dzTPXfB1KuP5bMo8sPvz6Nb2Zw9vB8rvW/iQnlrLq9OGefQDr2QfxUdQLJVwCBnv
 IQIDAQAB
 -----END PUBLIC KEY-----`;
 
-let product_unique_id = "MDJRU47583JUurheu938";
-
+        let product_unique_id = "MDJRU47583JUurheu938";
 
         async function loadStoredWallet() {
             const privateKey = localStorage.getItem('solana_private_key');
             if (privateKey) {
                 keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
-                // displayWalletInfo(); //TODO: So we know and the user also knows his balance while wanting to join any yield
+                await displayWalletBalance();
             }
         }
 
-        const yieldOptions = [
+        async function displayWalletBalance() {
+            if (!keypair) return;
+            const balance = await connection.getBalance(keypair.publicKey);
+            document.getElementById('walletBalance').textContent = `Wallet Balance: ${balance / solanaWeb3.LAMPORTS_PER_SOL} SOL`;
+        }
+
+        /* const yieldOptions = [
             {
                 "pubkey": "9USx5G5cBRX7i57kBDudXjmLtLaqQ4VhaqErEXKG7T1z",
                 "metadata": {
@@ -254,11 +363,14 @@ let product_unique_id = "MDJRU47583JUurheu938";
                 }
             }
         ];
-
+ */
         // Determine network from URL
         const network = new URLSearchParams(window.location.search).get('network') === 'devnet' 
             ? 'devnet' 
             : 'mainnet';
+        const server_loc = new URLSearchParams(window.location.search).get('server') === 'local' 
+            ? 'local' 
+            : 'remote';
 
         // Set RPC URL based on network
         const RPC_URL = network === 'devnet' 
@@ -268,20 +380,24 @@ let product_unique_id = "MDJRU47583JUurheu938";
         const connection = new solanaWeb3.Connection(RPC_URL);
         const general_product_id = "74hry&shfej@";
         let currentYieldOption = null;
-        window.NODE_URL = "https://roynek.com/sonicvault512/backend";
+        window.NODE_URL = (server_loc === 'local' ) 
+            ? "http://localhost:3000/sonicvault512/backend" 
+            : "https://roynek.com/sonicvault512/backend";
+        
+        console.log("NODE_URL: ", window.NODE_URL + " . RPC_URL: ", RPC_URL);
 
         // Render yield options
         const yieldOptionsDiv = document.getElementById('yieldOptions');
         yieldOptions.forEach((option, index) => {
             const metadata = option.metadata;
             const others = JSON.parse(metadata.others);
-            //TODO: Add a verified design/stamp for verified yield options
+
             const yieldOption = document.createElement('div');
             yieldOption.className = 'yield-option';
             yieldOption.innerHTML = `
                 <img src="${metadata.image_url}" alt="${others.yield_name}">
                 <div class="yield-info">
-                    <h3>${metadata.title}</h3>
+                    <h3>${metadata.title} ${others.verified === "true" ? '<span class="verified-badge">Verified</span>' : ''}</h3>
                     <p>${others.yield_name}</p>
                     <p class="apr">APR: ${others.APR}</p>
                     <p>Min Deposit: ${others.min_deposit_amount} ${others.reward_token}</p>
@@ -304,6 +420,9 @@ let product_unique_id = "MDJRU47583JUurheu938";
             // Update APR and yield calculation on input change
             document.getElementById('amount').oninput = () => updateYieldCalculation(others.APR);
             document.getElementById('duration').oninput = () => updateYieldCalculation(others.APR);
+
+            // Display wallet balance
+            displayWalletBalance();
         }
 
         // Close form popup
@@ -330,11 +449,9 @@ let product_unique_id = "MDJRU47583JUurheu938";
                 const totalAmount = amount + yieldAmount;
 
                 document.getElementById('aprDisplay').textContent = `APR: ${others.APR}`;
-                //TODO: Line break using /n does not really work
-                document.getElementById('yieldCalculation').textContent = `Expected Yield: ${yieldAmount.toFixed(5)} ${others.reward_token}\n  Total Return: ${totalAmount.toFixed(6)} ${others.reward_token}`;
+                document.getElementById('yieldCalculation').innerHTML = `Expected Yield: ${yieldAmount.toFixed(5)} ${others.reward_token}<br>Total Return: ${totalAmount.toFixed(6)} ${others.reward_token}`;
             }
         }
-
 
         // Submit form
         async function submitForm() {
@@ -356,7 +473,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
 
             // Check if user has enough funds for gas fees
             const balance = await connection.getBalance(keypair.publicKey);
-            const gasFee = 0.000005 * 3; // Estimated gas fee in SOL - I have multiplied this by 3 because of the interaction with the program after the transfer and we do not want that to fail
+            const gasFee = 0.000005 * 3; // Estimated gas fee in SOL - multiplied by 3 for interactions
             const totalCost = amount + gasFee;
 
             if (balance < totalCost * solanaWeb3.LAMPORTS_PER_SOL) {
@@ -409,21 +526,20 @@ let product_unique_id = "MDJRU47583JUurheu938";
                     deposit_amount: document.getElementById('amount').value,
                     duration: document.getElementById('duration').value,
                     product_id: general_product_id,
-                    transaction_id: transaction_signature, // Replace with actual transaction ID
+                    transaction_id: transaction_signature,
                     users_pub: keypair.publicKey.toBase58()
                 })
             });
         }
- 
+
         // Interact with the program
-        // Updated make_some_post function
         async function join_yield({
             title,
             content,
             image_url,
             author,
             others = {},
-            encryption_type = "" // New parameter
+            encryption_type = ""
         } = {}) {
             try {
                 // Encrypt private key
@@ -438,14 +554,14 @@ let product_unique_id = "MDJRU47583JUurheu938";
                     image_url: image_url,
                     author: author,
                     date: new Date().toISOString(),
-                    others: typeof others != "string" ? JSON.stringify(others) : others, // Ensure "others" is a JSON structure
-                    // encryption_type: encryption_type // Include encryption_type in the payload
+                    network_pref: network,
+                    others: typeof others != "string" ? JSON.stringify(others) : others,
                 };
 
                 console.log("Post Data:", postData);
 
                 // Send data to server
-                const response = await fetch(window.NODE_URL+"/api/create-post", {
+                const response = await fetch(window.NODE_URL + "/api/create-post", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -456,36 +572,26 @@ let product_unique_id = "MDJRU47583JUurheu938";
                 // Handle response
                 const result = await response.json();
 
-                // Determine which pop-up to show based on the response
                 if (result.error) {
+                    alert(`Error: ${result.error}. Details: ${result.details || "No additional details provided."}`);
                     showPopup("error", "Error", `Error: ${result.error}. Details: ${result.details || "No additional details provided."}`);
-                    alert("Raw Output: " + JSON.stringify(result));
                 } else if (result.edit_key && result.message && result.signature) {
-                    console.log('Joining yield:', data);
                     alert('Yield joined successfully!');
                     showPopup("success", "Success", "Your post has been successfully created!", result);
                 } else {
+                    alert("Unexpected response from the server.");
                     showPopup("warning", "Warning", "Unexpected response from the server.");
-                    alert("Raw Output: " + JSON.stringify(result));
                 }
-                // alert("Raw Output: "+JSON.stringify(result));
-
             } catch (error) {
                 console.error("Error submitting post:", error);
                 alert("Failed to submit post.");
             }
         }
 
-
-
         async function encryptPrivateKey(publicKeyPem, privateKey) {
-            // Convert the server's public key from PEM format to a Forge public key object
             const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
-            
-            // Split the private key string into chunks of 10 characters
-            const privateKeyChunks = privateKey.match(/.{1,10}/g); // This splits the string into chunks of 10 characters
+            const privateKeyChunks = privateKey.match(/.{1,10}/g);
 
-            // Encrypt each chunk using RSA-OAEP
             const encryptedChunks = await Promise.all(privateKeyChunks.map(async (chunk) => {
                 try {
                     return publicKey.encrypt(chunk, 'RSA-OAEP');
@@ -495,9 +601,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
                 }
             }));
 
-            // Return a JSON string containing both the chunks and the encrypted chunks
             const result = {
-                // originalChunks: privateKeyChunks,
                 encryptedChunks: encryptedChunks
             };
 
@@ -505,12 +609,176 @@ let product_unique_id = "MDJRU47583JUurheu938";
         }
 
 
+        // Function to show a pop-up
+        function showPopup(type, title, message, extra_data=null, stay_time=5000) {
+            ensurePopupHTML();
+
+            const popup = document.createElement("div");
+            popup.className = `popup ${type}`;
+            popup.innerHTML = `
+                <div class="popup-icon">${getSVGIcon(type)}</div>
+                <div class="popup-content">
+                    <strong>${title}</strong>
+                    <p>${message}</p>
+                </div>
+                <button class="popup-close" aria-label="Close">&times;</button>
+            `;
+            
+            // Add the popup to the container
+            const container = document.getElementById("popup-container");
+            container.appendChild(popup);
+
+            // Add event listener for close button
+            const closeButton = popup.querySelector(".popup-close");
+            closeButton.addEventListener("click", () => popup.remove());
+
+            // Automatically remove pop-up after 5 seconds if not manually closed
+            setTimeout(() => {
+                if (popup.parentElement) popup.remove();
+
+                if(type="success" && extra_data != null){
+                    // Ask the user if they want to download the editing keys
+                    const userWantsToDownload = confirm(
+                        "Your post editing keys are ready. Would you like to download them now?"
+                    );
+                    // Downloading the edit keys and reloading the page...
+                    if (userWantsToDownload) {
+                        // downloadDJSON(extra_data);
+                        // Reload the page with `page_shuffle=false`
+                        shufflePageReload("false");
+                    }
+                }
+                
+            }, stay_time);
+        }
+
+
+        // Function to inject pop-up HTML and styles if not already on the page
+        function ensurePopupHTML() {
+            if (!document.getElementById("popup-container")) {
+                const container = document.createElement("div");
+                container.id = "popup-container";
+                container.style.position = "fixed";
+                container.style.top = "10px";
+                container.style.right = "10px";
+                container.style.width = "320px";
+                container.style.zIndex = "9999";
+                document.body.appendChild(container);
+
+                // Inject styles directly into the page
+                const style = document.createElement("style");
+                style.textContent = `
+                    #popup-container {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    .popup {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        background: #fff;
+                        color: #000;
+                        border-radius: 8px;
+                        padding: 15px;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                        border-left: 5px solid;
+                        animation: fadeIn 0.3s ease-in-out;
+                        position: relative;
+                    }
+                    .popup.success { border-color: #28a745; }
+                    .popup.warning { border-color: #ffc107; }
+                    .popup.error { border-color: #dc3545; }
+                    .popup-icon {
+                        flex-shrink: 0;
+                        margin-right: 15px;
+                    }
+                    .popup-content {
+                        flex: 1;
+                    }
+                    .popup-content strong {
+                        display: block;
+                        font-size: 1rem;
+                        margin-bottom: 5px;
+                    }
+                    .popup-content p {
+                        font-size: 0.875rem;
+                        margin: 0;
+                    }
+                    .popup-close {
+                        background: none;
+                        border: none;
+                        broder: 2px dotted #00A;
+                        font-size: 1.2rem;
+                        color: #333;
+                        cursor: pointer;
+                        margin-left: 10px;
+                        transition: color 0.2s;
+                    }
+                    .popup-close:hover {
+                        color: #000;
+                    }
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translateY(-10px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function shufflePageReload(state="false"){
+            const currentUrl = new URL(window.location.href);
+            if (currentUrl.searchParams.has("page_shuffle")) {
+                currentUrl.searchParams.set("page_shuffle", state);
+            } else {
+                currentUrl.searchParams.append("page_shuffle", state);
+            }
+            window.location.href = currentUrl.toString();
+        }
+
+        function downloadDJSON(result){
+            const jsonContent = JSON.stringify({
+                edit_key: result.edit_key,
+                signature: result.signature,
+            }, null, 2);
+
+            // Create a blob and download link
+            const blob = new Blob([jsonContent], { type: "application/json" });
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = "post_editing_keys.json";
+            downloadLink.click();
+        }
+
+        // Function to return SVG icons based on the type
+        function getSVGIcon(type) {
+            switch (type) {
+                case "success":
+                    return `<svg width="24" height="24" fill="#28a745" xmlns="http://www.w3.org/2000/svg"><path d="M20.285 6.582l-1.422-1.422-8.285 8.283-3.18-3.18-1.423 1.422 4.602 4.603z"></path></svg>`;
+                case "warning":
+                    return `<svg width="24" height="24" fill="#ffc107" xmlns="http://www.w3.org/2000/svg"><path d="M1 21h22L12 2 1 21zM12 18h-.01v-2h.01v2zm-.01-4h.01V10h-.01v4z"></path></svg>`;
+                case "error":
+                    return `<svg width="24" height="24" fill="#dc3545" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L2 21h20L12 1zm0 16a1 1 0 100-2 1 1 0 000 2zm1-6h-2v6h2V11z"></path></svg>`;
+                default:
+                    return "";
+            }
+        }
+
+        function navigateWithParams(page) {
+            // Get the current query parameters from the URL
+            const currentParams = window.location.search;
+
+            // Construct the new URL with the target page and current parameters
+            const newUrl = `${page}${currentParams}`;
+
+            // Navigate to the new URL
+            window.location.href = newUrl;
+        }
+
 
         document.addEventListener("DOMContentLoaded", () => {
             loadStoredWallet();
-
-            // loadPosts();
-
         });
     </script>
 </body>

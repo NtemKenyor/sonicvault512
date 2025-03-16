@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Yields - SonicVault512</title>
+    <script src="js/yield_options.js"></script>
+    <link rel="icon" type="image/webp" href="src/logo.webp">
+    <script src="js/solana-web3.js"></script>
+
+    <style>
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 12px;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            /* background-color: #bdbcbc; */
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+            
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                /* flex-direction: column; */
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+    </style>
+    <!-- <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            text-align: center;
+        }
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+        .yield-group {
+            margin-bottom: 30px;
+        }
+        .yield-group h3 {
+            color: #00ffcc;
+            margin-bottom: 10px;
+        }
+        .yield-item {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
+        }
+        .yield-item p {
+            margin: 5px 0;
+            color: #cccccc;
+        }
+        .yield-item button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .yield-item button:hover {
+            background-color: #00cc99;
+        }
+        .fallback-ui {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .fallback-ui svg {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+        }
+        .fallback-ui p {
+            color: #cccccc;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .fallback-ui p:hover {
+            color: #00ffcc;
+        }
+    </style> -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            text-align: center;
+        }
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+        .yield-group {
+            margin-bottom: 30px;
+        }
+        .yield-group h3 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+        .yield-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .yield-item {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0px 0px 10px rgba(0, 255, 204, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .yield-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+        }
+        .yield-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .yield-item p {
+            margin: 5px 0;
+            color: #cccccc;
+            text-align: center;
+        }
+        .yield-item .remaining-time {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffcc;
+        }
+        .yield-item button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+        .yield-item button:hover {
+            background-color: #00cc99;
+        }
+        .fallback-ui {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .fallback-ui svg {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+        }
+        .fallback-ui p {
+            color: #cccccc;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .fallback-ui p:hover {
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <img src="src/logo.webp" alt="SonicVault512 Logo" class="logo">
+        <nav>
+            <a href="javascript:void(0);" onclick="navigateWithParams('wallet.html')" class="active">Wallet</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('yield.html')">Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('user_yield.html')">User Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('dapps.html')">DApps</a>
+        </nav>
+    </header>
+
+
+    <div class="container">
+        <h2>Your Yields</h2>
+        <div id="activeYields" class="yield-group">
+            <!-- <h3>Active Yields</h3> -->
+        </div>
+        <div id="inactiveYields" class="yield-group">
+            <!-- <h3>Inactive Yields</h3> -->
+        </div>
+        <div id="fallbackUI" class="fallback-ui" style="display: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12" y2="16"></line>
+            </svg>
+            <p>No yields found. <span style="font-weight: bold;"> Join a yield </span> to get started!</p>
+        </div>
+    </div>
+
+    <script>
+        let keypair;
+        const serverPublicKeyPem = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAu1ff4e8iKylXLdXkFyIP
+nXNW0C4dmdwQ5sHDHH/Xan4UWvSw99IYl8eIIjnwrW+C0e2EWmkUBrTCtawg0OTf
+wISkvq09/gR+wqeyXoNxLdN5kZ3eTuJolj3xqAMkT4USo6SDSwWmRTACO55S89c/
+Ysd7EFrpE+pSl9X+1Fl1CpmVFDqprw02gNbK2WgC/tQV/K78PobuY4VPAQouybNh
+KrLkTYqRKkv9dQo6ZgpVKpGaOXBWoLB2ffVKAW8wCWzLESJHC1b51rNi+03MgBJl
+dzTPXfB1KuP5bMo8sPvz6Nb2Zw9vB8rvW/iQnlrLq9OGefQDr2QfxUdQLJVwCBnv
+IQIDAQAB
+-----END PUBLIC KEY-----`;
+
+        // Determine network from URL
+        const network = new URLSearchParams(window.location.search).get('network') === 'devnet' 
+            ? 'devnet' 
+            : 'mainnet';
+        const server_loc = new URLSearchParams(window.location.search).get('server') === 'local' 
+            ? 'local' 
+            : 'remote';
+
+        // Set RPC URL based on network
+        const RPC_URL = network === 'devnet' 
+            ? 'https://api.testnet.sonic.game/' 
+            : 'https://api.mainnet-beta.solana.com';
+        const general_product_id = "74hry&shfej@";
+
+        const connection = new solanaWeb3.Connection(RPC_URL);
+        window.NODE_URL = (server_loc === 'local' ) 
+            ? "http://localhost:3000/sonicvault512/backend" 
+            : "https://roynek.com/sonicvault512/backend";
+
+        console.log("NODE_URL: ", window.NODE_URL + " . RPC_URL: ", RPC_URL);
+
+        async function loadStoredWallet() {
+            const privateKey = localStorage.getItem('solana_private_key');
+            if (privateKey) {
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
+                await loadUserYields();
+            }
+        }
+
+        function sortPostsByDate(posts) {
+            try {
+                return posts.sort((a, b) => {
+                    const dateA = new Date(a.metadata.date);
+                    const dateB = new Date(b.metadata.date);
+
+                    if (isNaN(dateA) && isNaN(dateB)) return 0; // Both invalid
+                    if (isNaN(dateA)) return 1; // A is invalid
+                    if (isNaN(dateB)) return -1; // B is invalid
+
+                    return dateB - dateA; // Most recent first
+                });
+            } catch (error) {
+                console.warn("Error during sorting. Falling back to default order:", error);
+                return posts; // Return posts unsorted as fallback
+            }
+        }
+
+/*    
+        async function loadUserYields() {
+            try {
+                // Fetch user yields from the server
+                const response = await fetch(window.NODE_URL + `/api/user-yields?network=${network}&user=${keypair.publicKey.toBase58()}`);
+                const data = await response.json();
+
+                // If no yields are found, show the fallback UI
+                if (!data || data.length === 0) {
+                    showFallbackUI();
+                    return;
+                }
+
+                // Sort the combined data by date
+                const sortedData = sortPostsByDate(data);
+
+                // Group yields into active and inactive
+                const activeYields = [];
+                const inactiveYields = [];
+
+                data.forEach(entry => {
+                    const yield = entry.metadata;
+                    const othersObj = JSON.parse(yield.others);
+
+                    if (othersObj.product_id === general_product_id) {
+                        const joinDate = new Date(yield.date);
+                        const durationHours = othersObj.duration;
+                        const endDate = new Date(joinDate.getTime() + durationHours * 60 * 60 * 1000);
+                        
+
+                        // Calculate earnings based on APR
+                        const elapsedTimeHours = (new Date() - joinDate) / (1000 * 60 * 60);
+                        const apr = parseFloat(othersObj.APR.replace('%', ''));
+                        const depositAmount = parseFloat(othersObj.deposit_amount);
+                        const earnings = (depositAmount * (apr / 100) * (elapsedTimeHours / 8760)).toFixed(5);
+
+                        if (endDate > new Date()) {
+                            activeYields.push({ ...yield, earnings });
+                        } else {
+                            inactiveYields.push({ ...yield, earnings });
+                        }
+                    }
+                });
+
+                // Render active yields
+                const activeYieldsDiv = document.getElementById('activeYields');
+                if (activeYields.length !== 0) {
+                    activeYieldsDiv.innerHTML = '<h3>Active Yields</h3>';
+                }
+                activeYields.forEach(yield => {
+                    const others = JSON.parse(yield.others);
+
+                    const yieldDiv = document.createElement('div');
+                    yieldDiv.className = 'yield-item';
+                    yieldDiv.innerHTML = `
+                        <div>
+                            <p>Yield: ${others.yield_name}</p>
+                            <p>Deposit: ${others.deposit_amount} ${others.reward_token}</p>
+                            <p>Earnings: ${yield.earnings} ${others.coin}</p>
+                            <p>Remaining Time: ${calculateRemainingTime(yield.date, others.duration)}</p>
+                        </div>
+                    `;
+                    activeYieldsDiv.appendChild(yieldDiv);
+                });
+
+                // Render inactive yields
+                const inactiveYieldsDiv = document.getElementById('inactiveYields');
+                if (inactiveYields.length !== 0) {
+                    inactiveYieldsDiv.innerHTML = '<h3>Inactive Yields</h3>';
+                }
+                inactiveYields.forEach(yield => {
+                    const others = JSON.parse(yield.others);
+
+                    const yieldDiv = document.createElement('div');
+                    yieldDiv.className = 'yield-item';
+                    yieldDiv.innerHTML = `
+                        <div>
+                            <p>Yield: ${others.yield_name}</p>
+                            <p>Total Earnings: ${yield.earnings} ${others.coin}</p>
+                        </div>
+                        <div>
+                            <button onclick="continueYield('${others.yield_id}')">Continue</button>
+                            <button onclick="withdrawYield('${others.yield_id}')">Withdraw</button>
+                        </div>
+                    `;
+                    inactiveYieldsDiv.appendChild(yieldDiv);
+                });
+            } catch (error) {
+                console.error("Error loading user yields:", error);
+                showFallbackUI();
+            }
+        }
+ */
+
+        async function loadUserYields() {
+            try {
+                // Fetch user yields from the server
+                const response = await fetch(window.NODE_URL + `/api/user-yields?network=${network}&user=${keypair.publicKey.toBase58()}`);
+                const data = await response.json();
+
+                // If no yields are found, show the fallback UI
+                if (!data || data.length === 0) {
+                    showFallbackUI();
+                    return;
+                }
+
+                // Sort the combined data by date
+                const sortedData = sortPostsByDate(data);
+
+                // Group yields into active and inactive
+                const activeYields = [];
+                const inactiveYields = [];
+
+                data.forEach(entry => {
+                    const yield = entry.metadata;
+                    const othersObj = JSON.parse(yield.others);
+
+                    if (othersObj.product_id === general_product_id) {
+                        const joinDate = new Date(yield.date);
+                        const durationHours = othersObj.duration;
+                        const endDate = new Date(joinDate.getTime() + durationHours * 60 * 60 * 1000);
+
+                        // Calculate earnings based on APR
+                        const elapsedTimeHours = (new Date() - joinDate) / (1000 * 60 * 60);
+                        const apr = parseFloat(othersObj.APR.replace('%', ''));
+                        const depositAmount = parseFloat(othersObj.deposit_amount);
+                        const earnings = (depositAmount * (apr / 100) * (elapsedTimeHours / 8760)).toFixed(5);
+
+                        if (endDate > new Date()) {
+                            activeYields.push({ ...yield, earnings, endDate });
+                        } else {
+                            inactiveYields.push({ ...yield, earnings });
+                        }
+                    }
+                });
+
+                // Render active yields
+                const activeYieldsDiv = document.getElementById('activeYields');
+                if (activeYields.length !== 0) {
+                    activeYieldsDiv.innerHTML = '<h3>Active Yields</h3>';
+                    const activeGrid = document.createElement('div');
+                    activeGrid.className = 'yield-grid';
+                    activeYieldsDiv.appendChild(activeGrid);
+
+                    activeYields.forEach(yield => {
+                        const others = JSON.parse(yield.others);
+
+                        const yieldDiv = document.createElement('div');
+                        yieldDiv.className = 'yield-item';
+                        yieldDiv.innerHTML = `
+                            <img src="${yield.image_url}" alt="${others.yield_name}">
+                            <p>Yield: ${others.yield_name}</p>
+                            <p>Deposit: ${others.deposit_amount} ${others.coin}</p>
+                            <p>Earnings: ${yield.earnings} ${others.coin}</p>
+                            <p class="remaining-time">Remaining Time: <span id="remaining-time-${others.transaction_id}">${calculateRemainingTime(yield.endDate)}</span></p>
+                        `;
+                        activeGrid.appendChild(yieldDiv);
+
+                        // Update remaining time every second
+                        setInterval(() => {
+                            const remainingTimeElement = document.getElementById(`remaining-time-${others.transaction_id}`);
+                            if (remainingTimeElement) {
+                                remainingTimeElement.textContent = calculateRemainingTime(yield.endDate);
+                            }
+                        }, 1000);
+                    });
+                }
+
+                // Render inactive yields
+                const inactiveYieldsDiv = document.getElementById('inactiveYields');
+                if (inactiveYields.length !== 0) {
+                    inactiveYieldsDiv.innerHTML = '<h3>Inactive Yields</h3>';
+                    const inactiveGrid = document.createElement('div');
+                    inactiveGrid.className = 'yield-grid';
+                    inactiveYieldsDiv.appendChild(inactiveGrid);
+
+                    inactiveYields.forEach(yield => {
+                        const others = JSON.parse(yield.others);
+
+                        const yieldDiv = document.createElement('div');
+                        yieldDiv.className = 'yield-item';
+                        yieldDiv.innerHTML = `
+                            <img src="${yield.image_url}" alt="${others.yield_name}">
+                            <p>Yield: ${others.yield_name}</p>
+                            <p>Total Earnings: ${yield.earnings} ${others.coin}</p>
+                            <div>
+                                <button onclick="continueYield('${others.yield_id}')">Continue</button>
+                                <button onclick="withdrawYield('${others.yield_id}')">Withdraw</button>
+                            </div>
+                        `;
+                        inactiveGrid.appendChild(yieldDiv);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading user yields:", error);
+                showFallbackUI();
+            }
+        }
+
+        function calculateRemainingTime(endDate) {
+            const remainingTime = endDate - new Date();
+            if (remainingTime <= 0) return "Yield Ended";
+
+            const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+            return `${hours}h ${minutes}m ${seconds}s`;
+        }
+
+
+        function showFallbackUI() {
+            const fallbackUI = document.getElementById('fallbackUI');
+            fallbackUI.style.display = 'flex';
+
+            // Redirect to yield.html when the user clicks the SVG or message
+            fallbackUI.addEventListener('click', () => {
+                window.location.href = 'yield.html';
+            });
+        }
+
+        /* function calculateRemainingTime(joinDate, durationHours) {
+            const endDate = new Date(new Date(joinDate).getTime() + durationHours * 60 * 60 * 1000);
+            const remainingTime = endDate - new Date();
+            const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+        }
+ */
+        async function continueYield(yieldId) {
+            // Redirect to the yield page to create a new yield
+            window.location.href = `yield.html?yieldId=${yieldId}`;
+        }
+
+        async function withdrawYield(yieldId) {
+            try {
+                // Fetch yield details
+                const response = await fetch(window.NODE_URL + `/api/yield-details?yieldId=${yieldId}`);
+                const yieldDetails = await response.json();
+
+                // Transfer funds back to the user
+                const transaction = new solanaWeb3.Transaction().add(
+                    solanaWeb3.SystemProgram.transfer({
+                        fromPubkey: new solanaWeb3.PublicKey(yieldDetails.pubkey),
+                        toPubkey: keypair.publicKey,
+                        lamports: yieldDetails.total_amount * solanaWeb3.LAMPORTS_PER_SOL,
+                    })
+                );
+
+                const signature = await solanaWeb3.sendAndConfirmTransaction(connection, transaction, [keypair]);
+                alert(`Withdrawal successful! Signature: ${signature}`);
+            } catch (error) {
+                console.error("Error withdrawing yield:", error);
+                alert("Failed to withdraw funds. Please try again.");
+            }
+        }
+
+        function navigateWithParams(page) {
+            // Get the current query parameters from the URL
+            const currentParams = window.location.search;
+
+            // Construct the new URL with the target page and current parameters
+            const newUrl = `${page}${currentParams}`;
+
+            // Navigate to the new URL
+            window.location.href = newUrl;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStoredWallet();
+        });
+    </script>
+</body>
+</html>

@@ -5,9 +5,193 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wallet - SonicVault512</title>
     <script src="js/solana-web3.js"></script>
-
+    <script src="js/yield_options.js"></script>
+    <link rel="icon" type="image/webp" href="src/logo.webp">
     <!-- <script src="https://unpkg.com/@solana/web3.js@^1.32.0/lib/index.iife.min.js" defer></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+    <script src="js/axios.js"></script>
+    
+    <!-- <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        /* Container Styles */
+        .container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            margin-top: 100px; /* Adjust for header height */
+        }
+
+        h2 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #00ffcc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00cc99;
+        }
+
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .token-balance {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+
+        .token-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .token-info {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .token-price {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .popup button {
+            margin: 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+    </style> -->
+
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -20,6 +204,88 @@
             align-items: center;
             min-height: 100vh;
         }
+        /* Header Styles */
+        header {
+            width: 100%;
+            background: #1e1e1e;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            padding: 12px;
+        }
+
+        nav a:hover {
+            color: #00ffcc;
+            /* background-color: #bdbcbc; */
+            border-bottom: 2px solid #00ffcc;
+        }
+
+        nav a.active {
+            color: #00ffcc;
+            border-bottom: 2px solid #00ffcc;
+            
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            header {
+                /* flex-direction: column; */
+                padding: 10px;
+            }
+
+            nav {
+                margin-top: 10px;
+            }
+
+            nav a {
+                margin: 0 10px;
+            }
+
+            .container {
+                margin-top: 150px; /* Adjust for header height on smaller screens */
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav a {
+                margin: 5px 0;
+            }
+
+            .container {
+                margin-top: 200px; /* Adjust for header height on very small screens */
+            }
+        }
+
+
+
         .container {
             background: #1e1e1e;
             border-radius: 15px;
@@ -27,6 +293,13 @@
             max-width: 800px;
             width: 100%;
             box-shadow: 0px 0px 20px rgba(0, 255, 204, 0.5);
+        }
+
+        @media (max-width: 480px) {
+            .container{
+                display: flex;
+                flex-direction: column;
+            }
         }
         h2 {
             color: #00ffcc;
@@ -96,8 +369,22 @@
             z-index: 999;
         }
     </style>
+
 </head>
 <body>
+    <!-- Header -->
+    <header>
+        <img src="src/logo.webp" alt="SonicVault512 Logo" class="logo">
+        <nav>
+            <a href="javascript:void(0);" onclick="navigateWithParams('wallet.html')" class="active">Wallet</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('yield.html')">Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('user_yield.html')">User Yield</a>
+            <a href="javascript:void(0);" onclick="navigateWithParams('dapps.html')">DApps</a>
+        </nav>
+    </header>
+
+
+    <!-- Main Content -->
     <div class="container">
         <h2>Wallet</h2>
         <p id="publicKey">No wallet connected</p>
@@ -317,6 +604,18 @@
             location.reload();
         }
 
+        function navigateWithParams(page) {
+            // Get the current query parameters from the URL
+            const currentParams = window.location.search;
+
+            // Construct the new URL with the target page and current parameters
+            const newUrl = `${page}${currentParams}`;
+
+            // Navigate to the new URL
+            window.location.href = newUrl;
+        }
+
+        
         window.onload = loadStoredWallet;
     </script>
 </body>
