@@ -30,7 +30,7 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'; // Repl
 console.log(DEEPSEEK_API_KEY);
 
 
-let MAIN_DIR = "/somaker/backend";
+let MAIN_DIR = "/sonicvault512/backend";
 
 app.use(cors());
 app.use(express.json());

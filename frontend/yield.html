@@ -192,7 +192,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
 
         const yieldOptions = [
             {
-                "pubkey": "5vDfnGGr6VzDCM2hAtCx3h1G113FC5SFm5hMs88Nf7yR",
+                "pubkey": "9USx5G5cBRX7i57kBDudXjmLtLaqQ4VhaqErEXKG7T1z",
                 "metadata": {
                     "title": "Stake SONIC & Earn Rewards!",
                     "content": "Maximize your earnings by staking SONIC and earning high rewards over time. The more you stake, the greater your rewards. Start earning passive income today!\n\n{{element|type=iframe|src=https://roynek.com/cloudS/interact/public/stake_now/index.html}}",
@@ -223,7 +223,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
                 }
             },
             {
-                "pubkey": "B7GHK2LJX9VZT5MNYQWXR8J63P4T1PYFQ9LU2DA5KX3",
+                "pubkey": "BSsCnFimdYBKhrt4gvaCePxiXcooVZvexs39yEzwoMp1",
                 "metadata": {
                     "title": "Lend SOL & Earn Interest on Sonic!",
                     "content": "Lend your SOL on Sonic and earn steady interest. A secure and profitable way to make passive income while keeping your assets safe.\n\n{{element|type=iframe|src=https://roynek.com/cloudS/interact/public/lend_sol/index.html}}",
@@ -266,7 +266,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
             : 'https://api.mainnet-beta.solana.com';
 
         const connection = new solanaWeb3.Connection(RPC_URL);
-
+        const general_product_id = "74hry&shfej@";
         let currentYieldOption = null;
         window.NODE_URL = "https://roynek.com/sonicvault512/backend";
 
@@ -407,7 +407,7 @@ let product_unique_id = "MDJRU47583JUurheu938";
                     type: others.type,
                     deposit_amount: document.getElementById('amount').value,
                     duration: document.getElementById('duration').value,
-                    product_id: others.product_id,
+                    product_id: general_product_id,
                     transaction_id: transaction_signature, // Replace with actual transaction ID
                     users_pub: keypair.publicKey.toBase58()
                 })
@@ -417,10 +417,10 @@ let product_unique_id = "MDJRU47583JUurheu938";
         // Interact with the program
         // Updated make_some_post function
         async function join_yield({
-            title = document.getElementById("title").value,
-            content = document.getElementById("content").value,
-            image_url = document.getElementById("image_url").value,
-            author = document.getElementById("author").value || keypair.publicKey.toBase58(),
+            title,
+            content,
+            image_url,
+            author,
             others = {},
             encryption_type = "" // New parameter
         } = {}) {
