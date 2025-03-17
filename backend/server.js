@@ -108,17 +108,18 @@ const NETWORK_RPC_ENDPOINTS = {
 // Function to get the first available RPC endpoint for a given network
 async function getAvailableRpcEndpoint(network) {
     const endpoints = NETWORK_RPC_ENDPOINTS[network] || [];
-    for (const url of endpoints) {
-        try {
-            const connection = new Connection(url, 'confirmed');
-            // Test the connection by fetching the latest block height
-            await connection.getBlockHeight();
-            return url; // Return the first reachable endpoint
-        } catch (error) {
-            console.warn(`RPC endpoint ${url} is unreachable:`, error);
-        }
-    }
-    throw new Error(`No reachable RPC endpoints found for network: ${network}`);
+    return endpoints[0]
+    // for (const url of endpoints) {
+    //     try {
+    //         const connection = new Connection(url, 'confirmed');
+    //         // Test the connection by fetching the latest block height
+    //         await connection.getBlockHeight();
+    //         return url; // Return the first reachable endpoint
+    //     } catch (error) {
+    //         console.warn(`RPC endpoint ${url} is unreachable:`, error);
+    //     }
+    // }
+    // throw new Error(`No reachable RPC endpoints found for network: ${network}`);
 }
 
 

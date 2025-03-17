@@ -20,7 +20,10 @@ Welcome to **SonicVault512**, a next-generation decentralized finance (DeFi) pla
 
 Check out our **demo video** to see SonicVault512 in action:
 
-[![SonicVault512 Demo Video](https://via.placeholder.com/800x450)](https://www.youtube.com/watch?v=your-video-id)
+<!-- [![SonicVault512 Demo Video](https://via.placeholder.com/800x450)](https://www.youtube.com/watch?v=your-video-id) -->
+
+[SonicVault512 Demo Video](https://youtu.be/UFbbG8RngD0)
+
 
 ---
 
