@@ -8,7 +8,7 @@ Welcome to **SonicVault512**, a next-generation decentralized finance (DeFi) pla
 
 ## 🚀 Key Features
 
-- **Decentralized Staking Hubs**: Create your own staking hubs with verified or non-verified systems.
+- **Decentralized Staking Hubs**: Create your own yield platforms and staking hubs with verified or non-verified systems.
 - **Gamification**: Engage in daily challenges and earn rewards.
 - **Airdrop Rewards**: Participate in airdrops and grow your crypto portfolio.
 - **Enhanced Security**: Built with advanced DeFi security mechanisms to protect your assets.
@@ -72,7 +72,7 @@ SonicVault512 is licensed under the **CCO License**. See the [LICENSE](LICENSE) 
 
 ## 🌐 Connect With Us
 
-- **Website**: [https://sonicvault512.com](https://roynek.com/sonicvault512/frontend/)
+- **Website**: [SonicVault512 Website](https://roynek.com/sonicvault512/frontend/)
 - **Twitter**: [@SonicVault512](https://twitter.com/SonicVault512)
 <!-- - **Discord**: [Join our Discord](https://discord.gg/your-invite-link)
 - **Email**: support@sonicvault512.com -->
