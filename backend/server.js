@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const axios = require('axios'); // Import axios
+const { handlePayout } = require('./payhandle');
 
 
 const app = express();
@@ -133,7 +134,7 @@ app.get(MAIN_DIR+"/api/metadata", async (req, res) => {
     const network_pref = req.query.network; // Extract the network parameter
     console.log("Received network:", network_pref);
 
-    // set the preferred network from users-end
+    // set the preferred network from users-endpayoutHandlerpayoutHandler
     if(network_pref != null){
         dNetwork = network_pref;
     }
@@ -167,9 +168,27 @@ app.get(MAIN_DIR+"/api/user-yields", async (req, res) => {
 });
 
 
+// Payout endpoint
+app.get(MAIN_DIR+'/api/payout', async (req, res) => {
+    const { wallet_address, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id } = req.query;
+
+    // Validate required parameters
+    if (!wallet_address || !payment_type) {
+        return res.status(400).json({ error: 'Missing required parameters: wallet_address and payment_type' });
+    }
+
+    try {
+        const result = await handlePayout(wallet_address, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique);
+        return res.json(result);
+    } catch (error) {
+        console.error('Error processing payout:', error);
+        return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+
+});
 
 // Generate game content using DeepSeek API
-app.post(MAIN_DIR+'/generate', async (req, res) => {
+/* app.post(MAIN_DIR+'/generate', async (req, res) => {
     const { prompt, solanaAddress, code_state, emojis, platformers, effects } = req.body;
 
     try {
@@ -226,7 +245,7 @@ app.post(MAIN_DIR+'/generate', async (req, res) => {
         console.error('Error calling DeepSeek API:', error);
         res.status(500).json({ error: 'Failed to generate game content' });
     }
-});
+}); */
 
 app.post(MAIN_DIR+"/api/create-post", async (req, res) => {
     const { encryptedPrivateKey, publicKey, title, content, image_url, author, date, network_pref, others } = req.body;
