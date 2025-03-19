@@ -90,6 +90,7 @@
 
         function updateTimer() {
             let timeLeft = totalTime;
+
             let interval = setInterval(() => {
                 timeLeft--;
                 progressBar.style.width = (timeLeft / totalTime) * 100 + "%";
@@ -104,12 +105,20 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
-                    window.location.href = "index.html"; // Change this to your desired page
+
+                    // Get the current URL parameters
+                    let params = new URLSearchParams(window.location.search);
+                    let queryString = params.toString(); // Convert to string
+
+                    // Redirect to index.html with parameters
+                    let newURL = "index.html" + (queryString ? "?" + queryString : "");
+                    window.location.href = newURL;
                 }
             }, 1000);
         }
 
         updateTimer();
+        
     </script>
 </body>
 </html>
