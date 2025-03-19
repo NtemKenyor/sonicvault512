@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+            color: white;
+            font-family: "Poppins", Arial, sans-serif;
+            text-align: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .container {
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .checkmark {
+            font-size: 90px;
+            color: #4CAF50;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.8);
+            animation: bounce 1s infinite alternate;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-top: 10px;
+            text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.3);
+            animation: fadeInText 2s ease-in-out;
+        }
+        p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            animation: fadeInText 2.5s ease-in-out;
+        }
+        .progress-container {
+            width: 80%;
+            max-width: 400px;
+            background-color: #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+            height: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #4CAF50;
+            transition: width 1s linear;
+        }
+        .countdown {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="checkmark">✔</div>
+        <h1>Payment Successful</h1>
+        <p>Thank you for your payment. You will be redirected shortly...</p>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="countdown" id="countdown"></div>
+    </div>
+    <script>
+        let totalTime = 10; // Total time in seconds
+        let progressBar = document.getElementById("progressBar");
+        let countdown = document.getElementById("countdown");
+
+        function updateTimer() {
+            let timeLeft = totalTime;
+            let interval = setInterval(() => {
+                timeLeft--;
+                progressBar.style.width = (timeLeft / totalTime) * 100 + "%";
+
+                // Show countdown in the last 3 seconds
+                if (timeLeft <= 3) {
+                    countdown.style.opacity = "1";
+                    countdown.textContent = timeLeft;
+                } else {
+                    countdown.style.opacity = "0";
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    window.location.href = "your-redirect-url.html"; // Change this to your desired page
+                }
+            }, 1000);
+        }
+
+        updateTimer();
+    </script>
+</body>
+</html>
