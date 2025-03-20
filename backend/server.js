@@ -178,7 +178,11 @@ app.get(MAIN_DIR+'/api/payout', async (req, res) => {
     }
 
     try {
-        const result = await handlePayout(wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique);
+        // handlePayout(wallet_address, sol_quantity, payment_type, s_network, r_network, transaction_signature, transaction_id) 
+        // const result = await handlePayout(wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique);
+        const result = handlePayout(wallet, sol_amount, payment_type, s_network, r_network, transaction_signature, transaction_id, transunique); 
+        // const result = await handlePayout(wallet, sol_amount, payment_type, s_network, r_network, transaction_signature, transaction_id, transunique);
+        
         return res.json(result);
     } catch (error) {
         console.error('Error processing payout:', error);
