@@ -61,60 +61,6 @@ let solana_devnet = 'https://api.devnet.solana.com';
 
 
 // Main payout handler function
-/* async function handlePayout(wallet_address, sol_quantity, payment_type, s_network, r_network, transaction_signature, transaction_id) {
-    if (payment_type === 'card' || payment_type === 'flutterwave') {
-        // Verify card payment
-        if (!transaction_id) {
-            throw new Error('Missing transaction_id for card payment');
-        }
-
-        const { success, amountInUsdt } = await verifyCardPayment(transaction_id);
-
-        if (!success) {
-            throw new Error('Card payment verification failed');
-        }
-
-        // Fetch the current SOL price
-        const solPrice = await getSolPrice();
-        const amountInSol = amountInUsdt / solPrice;
-
-        // Send SOL to the user's wallet
-        const connection = (s_network === "mainnet") ? new Connection(sonic_mainnet) : new Connection(sonic_testnet); // Use devnet for testing
-        const signature = await sendSol(wallet_address, amountInSol, connection);
-
-        return { 
-            message: 'Card payment processed and SOL sent', 
-            wallet_address, 
-            amountInSol, 
-            transaction_signature: signature 
-        };
-    } else if (payment_type === 'solana') {
-        // Validate blockchain-specific parameters
-        if (!r_network || !transaction_signature) {
-            throw new Error('Missing required parameters for blockchain payment: network and transaction_signature');
-        }
-
-
-        // Send the same amount of SOL to the user's wallet
-        const connection = new Connection(
-            s_network === 'mainnet' ? sonic_mainnet : sonic_testnet
-        );
-        const signature = await sendSol(wallet_address, amountInSol, connection);
-
-        return { 
-            message: 'Blockchain payment processed and SOL sent', 
-            wallet_address,
-            sol_quantity, 
-            // amountInSol, 
-            transaction_signature: signature 
-        };
-    } else {
-        throw new Error('Invalid payment type. Supported types: card, flutterwave, blockchain');
-    }
-} */
-
-
-// Main payout handler function
 async function handlePayout(wallet_address, sol_quantity, payment_type, s_network, r_network, transaction_signature, transaction_id, transunique) {
     try {
         if (payment_type === 'card' || payment_type === 'flutterwave') {
@@ -149,7 +95,7 @@ async function handlePayout(wallet_address, sol_quantity, payment_type, s_networ
             };
         } else if (payment_type === 'solana') {
             // Validate blockchain-specific parameters
-            if (!r_network || !transaction_signature) {
+            if (!transaction_signature) {
                 return { error: 'Missing required parameters for blockchain payment: network and transaction_signature' };
             }
 
