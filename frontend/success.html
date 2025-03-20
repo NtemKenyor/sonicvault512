@@ -118,6 +118,73 @@
         }
 
         updateTimer();
+
+        // Global variables
+        let keypair;
+        let walletAddress;
+
+        // Function to load the stored wallet from localStorage
+        async function loadStoredWallet_Pay() {
+            const privateKey = localStorage.getItem('solana_private_key');
+            if (privateKey) {
+                keypair = solanaWeb3.Keypair.fromSecretKey(Uint8Array.from(JSON.parse(privateKey)));
+                walletAddress = keypair.publicKey.toString(); // Set the wallet address
+                console.log('Wallet loaded:', walletAddress);
+            } else {
+                console.warn('No private key found in localStorage.');
+                // Prompt the user to provide a public wallet address
+                walletAddress = prompt('Please enter your Solana wallet address to receive funds:');
+                if (!walletAddress) {
+                    console.error('No wallet address provided.');
+                    alert('You must provide a wallet address to proceed.');
+                    return;
+                }
+                console.log('Using provided wallet address:', walletAddress);
+            }
+        }
+
+        // Function to make the GET request to the payout endpoint
+        async function makePayoutRequest() {
+            // Step 1: Ensure the wallet is loaded
+            await loadStoredWallet_Pay();
+            if (!walletAddress) {
+                console.error('Wallet address is not available.');
+                return;
+            }
+
+            // Step 2: Extract all query parameters from the current URL
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Step 3: Add the wallet address to the query parameters
+            urlParams.set('wallet', walletAddress);
+
+            // Step 4: Construct the full URL for the API request
+            const apiUrl = `https://roynek.com/sonicvault512/backend/api/payout?${urlParams.toString()}`;
+
+            // Step 5: Make a GET request to the endpoint
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Step 6: Print the JSON response to the console for debugging
+                    console.log('API Response:', data);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        // Call the function to make the payout request when the document is loaded
+        // document.addEventListener('DOMContentLoaded', () => {
+        //     console.log('Document loaded. Making payout request...');
+        //     makePayoutRequest();
+        // });
+        makePayoutRequest();
+
         
     </script>
 </body>
