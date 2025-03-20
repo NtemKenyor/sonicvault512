@@ -121,7 +121,7 @@ async function handlePayout(wallet_address, sol_quantity, payment_type, s_networ
             const connection = new Connection(
                 s_network === 'mainnet' ? sonic_mainnet : sonic_testnet
             );
-            const signature = await sendSol(wallet_address, amountInSol, connection);
+            const signature = await sendSol(wallet_address, sol_quantity, connection);
 
             return { 
                 message: 'Blockchain payment processed and SOL sent', 
