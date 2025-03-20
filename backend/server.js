@@ -169,7 +169,7 @@ app.get(MAIN_DIR+"/api/user-yields", async (req, res) => {
 
 // ?network=devnet&wallet_address=AAFW4kLEuUWwVhUXdQ3QiS7UEBbDRHiztXstsf4jwGJ4&sol_amount=0.05&usdt_paid=300&payment_type=flutterwave&s_network=devnet&r_network=devnet&transaction_signature=null&transaction_id=null&transunique=undefined
 // Payout endpoint
-app.get(MAIN_DIR+'/api/payout', async (req, res) => {
+/* app.get(MAIN_DIR+'/api/payout', async (req, res) => {
     const { wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique } = req.query;
 
     // Validate required parameters
@@ -189,6 +189,30 @@ app.get(MAIN_DIR+'/api/payout', async (req, res) => {
         return res.status(500).json({ error: error.message || 'Internal server error' });
     }
 
+}); */
+app.get(MAIN_DIR + '/api/payout', async (req, res) => {
+    const { wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique } = req.query;
+
+    // Validate required parameters
+    if (!wallet || !payment_type) {
+        return res.status(400).json({ error: 'Missing required parameters: wallet_address and payment_type' });
+    }
+
+    try {
+        // Call the handlePayout function
+        const result = await handlePayout(wallet, sol_amount, payment_type, s_network, r_network, transaction_signature, transaction_id, transunique);
+
+        // Check if the result contains an error
+        if (result.error) {
+            return res.status(400).json({ error: result.error });
+        }
+
+        // Return the success response
+        return res.json(result);
+    } catch (error) {
+        console.error('Error processing payout:', error);
+        return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
 });
 
 // Generate game content using DeepSeek API
