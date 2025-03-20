@@ -167,18 +167,18 @@ app.get(MAIN_DIR+"/api/user-yields", async (req, res) => {
     res.json(metadata);
 });
 
-
+// ?network=devnet&wallet_address=AAFW4kLEuUWwVhUXdQ3QiS7UEBbDRHiztXstsf4jwGJ4&sol_amount=0.05&usdt_paid=300&payment_type=flutterwave&s_network=devnet&r_network=devnet&transaction_signature=null&transaction_id=null&transunique=undefined
 // Payout endpoint
 app.get(MAIN_DIR+'/api/payout', async (req, res) => {
-    const { wallet_address, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id } = req.query;
+    const { wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id } = req.query;
 
     // Validate required parameters
-    if (!wallet_address || !payment_type) {
+    if (!wallet || !payment_type) {
         return res.status(400).json({ error: 'Missing required parameters: wallet_address and payment_type' });
     }
 
     try {
-        const result = await handlePayout(wallet_address, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique);
+        const result = await handlePayout(wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique);
         return res.json(result);
     } catch (error) {
         console.error('Error processing payout:', error);
