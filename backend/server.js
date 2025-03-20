@@ -170,7 +170,7 @@ app.get(MAIN_DIR+"/api/user-yields", async (req, res) => {
 // ?network=devnet&wallet_address=AAFW4kLEuUWwVhUXdQ3QiS7UEBbDRHiztXstsf4jwGJ4&sol_amount=0.05&usdt_paid=300&payment_type=flutterwave&s_network=devnet&r_network=devnet&transaction_signature=null&transaction_id=null&transunique=undefined
 // Payout endpoint
 app.get(MAIN_DIR+'/api/payout', async (req, res) => {
-    const { wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id } = req.query;
+    const { wallet, sol_amount, usdt_paid, payment_type, network, s_network, r_network, transaction_signature, transaction_id, transunique } = req.query;
 
     // Validate required parameters
     if (!wallet || !payment_type) {
